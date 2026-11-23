@@ -6,6 +6,7 @@ use App\Http\Filters\V1\TicketFilter;
 use App\Http\Requests\Api\V1\StoreTicketRequest;
 use App\Http\Resources\V1\TicketResource;
 use App\Models\Ticket;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class TicketController extends APIController
@@ -50,6 +51,17 @@ class TicketController extends APIController
         return new TicketResource(
             Ticket::create($request->mappedAttributes())
         );
+    }
+
+    /**
+     * DELETE /api/v1/tickets/{ticket}
+     * Deletes the ticket. A missing ticket never reaches this method: Laravel answers 404.
+     */
+    public function destroy(Ticket $ticket): JsonResponse
+    {
+        $ticket->delete();
+
+        return $this->ok('Ticket successfully deleted');
     }
 
     /**

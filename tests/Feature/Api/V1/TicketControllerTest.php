@@ -219,3 +219,32 @@ describe('store', function () {
         $this->postJson('/api/v1/tickets', ticketPayload())->assertUnauthorized();
     });
 });
+
+describe('destroy', function () {
+    it('deletes the ticket', function () {
+        $ticket = Ticket::factory()->create();
+
+        $this->withToken(jwtFor($this->user))
+            ->deleteJson("/api/v1/tickets/{$ticket->id}")
+            ->assertOk()
+            ->assertExactJson(['data' => null, 'message' => 'Ticket successfully deleted', 'status' => 200]);
+
+        $this->assertModelMissing($ticket);
+    });
+
+    it('returns 404 when the ticket is already gone', function () {
+        $ticket = Ticket::factory()->create();
+        $token = jwtFor($this->user);
+
+        $this->withToken($token)->deleteJson("/api/v1/tickets/{$ticket->id}")->assertOk();
+        $this->withToken($token)->deleteJson("/api/v1/tickets/{$ticket->id}")->assertNotFound();
+        $this->withToken($token)->getJson("/api/v1/tickets/{$ticket->id}")->assertNotFound();
+    });
+
+    it('returns 401 when no token is provided', function () {
+        $ticket = Ticket::factory()->create();
+
+        $this->deleteJson("/api/v1/tickets/{$ticket->id}")->assertUnauthorized();
+        $this->assertModelExists($ticket);
+    });
+});

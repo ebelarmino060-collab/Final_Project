@@ -22,7 +22,7 @@ Statuses: Not Started · In Progress · Completed · Blocked
 | 13 | Using (and Filtering) Nested Resources | Completed |
 | 14 | Sorting Data | Completed |
 | 15 | Creating Resources with POST Requests | Completed |
-| 16 | Deleting Resources with DELETE Requests | Not Started |
+| 16 | Deleting Resources with DELETE Requests | Completed |
 | 17 | Replacing Resources with PUT Requests | Not Started |
 | 18 | Updating Resources with PATCH Requests | Not Started |
 | 19 | Using Policies for User Authorization | Not Started |
@@ -156,4 +156,12 @@ Statuses: Not Started · In Progress · Completed · Blocked
 - **Files:** `app/Http/Requests/Api/V1/BaseTicketRequest.php` (new), `app/Http/Requests/Api/V1/StoreTicketRequest.php` (new), `app/Http/Controllers/Api/V1/APIController.php`, `app/Http/Controllers/Api/V1/TicketController.php`, `app/Models/Ticket.php`, `routes/api_v1.php`, `tests/Pest.php` (`ticketPayload()` helper), `tests/Feature/Api/V1/TicketControllerTest.php`.
 - **Testing:** 73 tests passing (201 + persisted state, defaults, client ticket number ignored, 422 for missing fields, 422 with the custom enum messages, 422 for an unknown author/assignee, 401).
 - **Commit:** `Creating Resources with Post Request`
+- **Status:** Completed
+
+## Lesson 16: Deleting Resources with DELETE Requests
+- **Concepts:** DELETE has no body and is idempotent; route model binding answers 404 before the controller runs.
+- **Ticket implementation:** `TicketController@destroy(Ticket $ticket)` returns `ok('Ticket successfully deleted')`; the `destroy` route is enabled.
+- **Files:** `app/Http/Controllers/Api/V1/TicketController.php`, `routes/api_v1.php`, `tests/Feature/Api/V1/TicketControllerTest.php`.
+- **Testing:** 76 tests passing (200 + row removed, a second DELETE and a GET return 404, 401 leaves the row in place).
+- **Commit:** `Deleting Resources with Delete Request`
 - **Status:** Completed
