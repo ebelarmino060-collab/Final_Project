@@ -2,13 +2,42 @@
 
 namespace App\Http\Filters\V1;
 
+use App\Enums\TicketPriority;
+use App\Enums\TicketStatus;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * The filters allowed on the tickets endpoints.
+ * The filters and sort columns allowed on the tickets endpoints.
  */
 class TicketFilter extends QueryFilter
 {
+    /**
+     * The columns clients may sort tickets by.
+     *
+     * @var array<int|string, string>
+     */
+    protected array $sortable = [
+        'ticketNumber' => 'ticket_number',
+        'title',
+        'status',
+        'priority',
+        'createdAt' => 'created_at',
+        'updatedAt' => 'updated_at',
+    ];
+
+    /**
+     * Status follows the ticket lifecycle; priority goes from low to urgent.
+     *
+     * @return array<string, list<string>>
+     */
+    protected function sortOrders(): array
+    {
+        return [
+            'status' => TicketStatus::values(),
+            'priority' => TicketPriority::values(),
+        ];
+    }
+
     /**
      * ?createdAt=2026-08-19   or   ?createdAt=2026-08-01,2026-08-31
      */

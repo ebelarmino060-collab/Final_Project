@@ -127,3 +127,68 @@ it('keeps the filters on the pagination links', function () {
 
     expect(listTickets('status=open')->json('links.next'))->toContain('status=open');
 });
+
+/**
+ * The ticket ids of a list response, in the order the API returned them.
+ *
+ * @return list<int>
+ */
+function orderedTicketIds(TestResponse $response): array
+{
+    return collect($response->json('data'))->pluck('id')->all();
+}
+
+describe('sort', function () {
+    it('sorts by title ascending', function () {
+        $b = Ticket::factory()->create(['title' => 'B ticket']);
+        $a = Ticket::factory()->create(['title' => 'A ticket']);
+        $c = Ticket::factory()->create(['title' => 'C ticket']);
+
+        expect(orderedTicketIds(listTickets('sort=title')))->toBe([$a->id, $b->id, $c->id]);
+    });
+
+    it('sorts descending with a leading minus', function () {
+        $old = Ticket::factory()->create(['created_at' => '2026-01-01 00:00:00']);
+        $new = Ticket::factory()->create(['created_at' => '2026-06-01 00:00:00']);
+
+        expect(orderedTicketIds(listTickets('sort=-createdAt')))->toBe([$new->id, $old->id]);
+    });
+
+    it('sorts priority from low to urgent instead of alphabetically', function () {
+        $urgent = Ticket::factory()->create(['priority' => 'urgent']);
+        $low = Ticket::factory()->create(['priority' => 'low']);
+        $high = Ticket::factory()->create(['priority' => 'high']);
+        $medium = Ticket::factory()->create(['priority' => 'medium']);
+
+        expect(orderedTicketIds(listTickets('sort=priority')))->toBe([$low->id, $medium->id, $high->id, $urgent->id])
+            ->and(orderedTicketIds(listTickets('sort=-priority')))->toBe([$urgent->id, $high->id, $medium->id, $low->id]);
+    });
+
+    it('sorts status in lifecycle order', function () {
+        $closed = Ticket::factory()->create(['status' => 'closed']);
+        $open = Ticket::factory()->create(['status' => 'open']);
+        $inProgress = Ticket::factory()->create(['status' => 'in_progress']);
+
+        expect(orderedTicketIds(listTickets('sort=status')))->toBe([$open->id, $inProgress->id, $closed->id]);
+    });
+
+    it('sorts by several columns in order', function () {
+        $highB = Ticket::factory()->create(['priority' => 'high', 'title' => 'B']);
+        $lowA = Ticket::factory()->create(['priority' => 'low', 'title' => 'A']);
+        $highA = Ticket::factory()->create(['priority' => 'high', 'title' => 'A']);
+
+        expect(orderedTicketIds(listTickets('sort=-priority,title')))->toBe([$highA->id, $highB->id, $lowA->id]);
+    });
+
+    it('ignores columns that are not on the whitelist', function () {
+        Ticket::factory(2)->create();
+
+        expect(listTickets('sort=password,-description')->json('data'))->toHaveCount(2);
+    });
+});
+
+it('does not let the query string call protected filter helpers', function () {
+    Ticket::factory()->create();
+
+    expect(listTickets('filterDate=x&likeValue=y&orderBy=z')->json('data'))->toHaveCount(1);
+});

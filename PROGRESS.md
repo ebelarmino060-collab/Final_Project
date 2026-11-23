@@ -20,7 +20,7 @@ Statuses: Not Started · In Progress · Completed · Blocked
 | 11 | Using Optional Parameters to Load Optional Data | Completed |
 | 12 | Writing Filters | Completed |
 | 13 | Using (and Filtering) Nested Resources | Completed |
-| 14 | Sorting Data | Not Started |
+| 14 | Sorting Data | Completed |
 | 15 | Creating Resources with POST Requests | Not Started |
 | 16 | Deleting Resources with DELETE Requests | Not Started |
 | 17 | Replacing Resources with PUT Requests | Not Started |
@@ -138,4 +138,13 @@ Statuses: Not Started · In Progress · Completed · Blocked
 - **Files:** `app/Http/Controllers/Api/V1/UserTicketsController.php` (new), `routes/api_v1.php`, `tests/Feature/Api/V1/UserTicketsControllerTest.php` (new).
 - **Testing:** 55 tests passing (only that user's tickets, nested list + filter, 404 for a missing user, 401).
 - **Commit:** `Using (and Filtering) Nested Resources`
+- **Status:** Completed
+
+## Lesson 14: Sorting Data
+- **Concepts:** the `?sort=a,-b` convention, a `$sortable` whitelist that maps public names to columns (never pass client text to `orderBy()`), and a filter plus scope for users.
+- **Ticket implementation:** `QueryFilter::sort()` with the whitelist; `TicketFilter` can sort by `ticketNumber`, `title`, `status`, `priority`, `createdAt` and `updatedAt`. `AuthorFilter` (`id`, `name`, `email`, `createdAt`, `updatedAt`, `include=tickets`, sorting), `User::scopeFilter()`, and `AuthorsController@index(AuthorFilter $filters)`.
+- **Adjustments:** `priority` and `status` sort in their real order (low → urgent; open → closed) through a bound `CASE` expression, not alphabetically. The filter engine now calls only **public** filter methods (plus `sort`), which fixes a 500 a client could trigger by naming a protected helper such as `?filterDate=x`.
+- **Files:** `app/Http/Filters/V1/QueryFilter.php`, `app/Http/Filters/V1/TicketFilter.php`, `app/Http/Filters/V1/AuthorFilter.php` (new), `app/Models/User.php`, `app/Http/Controllers/Api/V1/AuthorsController.php`, `tests/Feature/Http/Filters/V1/TicketFilterTest.php`, `tests/Feature/Http/Filters/V1/AuthorFilterTest.php` (new).
+- **Testing:** 66 tests passing (asc/desc, priority and status order, multi-column, whitelist, protected helpers not callable, author name/email/id filters, author sort, include).
+- **Commit:** `Sorting Data`
 - **Status:** Completed
