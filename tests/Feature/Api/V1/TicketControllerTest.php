@@ -295,3 +295,69 @@ describe('replace', function () {
             ->assertNotFound();
     });
 });
+
+describe('update', function () {
+    it('changes only the status', function () {
+        $ticket = Ticket::factory()->create(['status' => 'open', 'title' => 'Keep me']);
+
+        $this->withToken(jwtFor($this->user))
+            ->patchJson("/api/v1/tickets/{$ticket->id}", ['data' => ['attributes' => ['status' => 'in_progress']]])
+            ->assertOk()
+            ->assertJsonPath('data.attributes.status', 'in_progress');
+
+        expect($ticket->fresh())
+            ->status->value->toBe('in_progress')
+            ->title->toBe('Keep me');
+    });
+
+    it('changes only the priority', function () {
+        $ticket = Ticket::factory()->create(['priority' => 'low']);
+
+        $this->withToken(jwtFor($this->user))
+            ->patchJson("/api/v1/tickets/{$ticket->id}", ['data' => ['attributes' => ['priority' => 'urgent']]])
+            ->assertOk();
+
+        expect($ticket->fresh()->priority->value)->toBe('urgent');
+    });
+
+    it('assigns and then unassigns the ticket', function () {
+        $ticket = Ticket::factory()->create();
+        $assignee = User::factory()->create();
+        $token = jwtFor($this->user);
+
+        $this->withToken($token)
+            ->patchJson("/api/v1/tickets/{$ticket->id}", ['data' => ['relationships' => ['assignee' => ['data' => ['id' => $assignee->id]]]]])
+            ->assertOk()
+            ->assertJsonPath('data.relationships.assignee.data.id', $assignee->id);
+
+        expect($ticket->fresh()->assigned_to)->toBe($assignee->id);
+
+        $this->withToken($token)
+            ->patchJson("/api/v1/tickets/{$ticket->id}", ['data' => ['relationships' => ['assignee' => ['data' => ['id' => null]]]]])
+            ->assertOk();
+
+        expect($ticket->fresh()->assigned_to)->toBeNull();
+    });
+
+    it('returns 422 with the custom message for an invalid status', function () {
+        $ticket = Ticket::factory()->create(['status' => 'open']);
+
+        $this->withToken(jwtFor($this->user))
+            ->patchJson("/api/v1/tickets/{$ticket->id}", ['data' => ['attributes' => ['status' => 'done']]])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors([
+                'data.attributes.status' => 'The data.attributes.status value is invalid. Please use open, in_progress, pending, resolved, closed.',
+            ]);
+
+        expect($ticket->fresh()->status->value)->toBe('open');
+    });
+
+    it('returns 422 when assigning a user that does not exist', function () {
+        $ticket = Ticket::factory()->create();
+
+        $this->withToken(jwtFor($this->user))
+            ->patchJson("/api/v1/tickets/{$ticket->id}", ['data' => ['relationships' => ['assignee' => ['data' => ['id' => 99999]]]]])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['data.relationships.assignee.data.id']);
+    });
+});

@@ -24,7 +24,7 @@ Statuses: Not Started · In Progress · Completed · Blocked
 | 15 | Creating Resources with POST Requests | Completed |
 | 16 | Deleting Resources with DELETE Requests | Completed |
 | 17 | Replacing Resources with PUT Requests | Completed |
-| 18 | Updating Resources with PATCH Requests | Not Started |
+| 18 | Updating Resources with PATCH Requests | Completed |
 | 19 | Using Policies for User Authorization | Not Started |
 | 20 | Controlling Access with Token Abilities | Not Started |
 | 21 | Applying Granular Permissions | Not Started |
@@ -172,4 +172,12 @@ Statuses: Not Started · In Progress · Completed · Blocked
 - **Files:** `app/Http/Requests/Api/V1/ReplaceTicketRequest.php` (new), `app/Http/Controllers/Api/V1/TicketController.php`, `routes/api_v1.php`, `tests/Feature/Api/V1/TicketControllerTest.php`.
 - **Testing:** 79 tests passing (full replace including unassign and author change, ticket number preserved, 422 for missing fields leaves the row unchanged, 404).
 - **Commit:** `Replacing Resources with Put Requests`
+- **Status:** Completed
+
+## Lesson 18: Updating Resources with PATCH Requests
+- **Concepts:** PATCH changes only the sent fields; `sometimes` rules; `mappedAttributes()` already returns only the keys present.
+- **Ticket implementation:** `UpdateTicketRequest` (every rule `sometimes`; assignee `nullable` to unassign), `TicketController@update`, and a manual `PATCH tickets/{ticket}` route. This delivers **change status**, **change priority** and **assign/unassign** as single-field PATCH requests.
+- **Files:** `app/Http/Requests/Api/V1/UpdateTicketRequest.php` (new), `app/Http/Controllers/Api/V1/TicketController.php`, `routes/api_v1.php`, `tests/Feature/Api/V1/TicketControllerTest.php`.
+- **Testing:** 84 tests passing (status-only change keeps the other fields, priority-only change, assign then unassign, 422 for an invalid status leaves the row unchanged, 422 for an unknown assignee).
+- **Commit:** `Updating Resources with Patch Requests`
 - **Status:** Completed

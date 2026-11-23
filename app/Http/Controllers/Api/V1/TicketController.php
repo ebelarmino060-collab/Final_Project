@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Filters\V1\TicketFilter;
 use App\Http\Requests\Api\V1\ReplaceTicketRequest;
 use App\Http\Requests\Api\V1\StoreTicketRequest;
+use App\Http\Requests\Api\V1\UpdateTicketRequest;
 use App\Http\Resources\V1\TicketResource;
 use App\Models\Ticket;
 use Illuminate\Http\JsonResponse;
@@ -71,6 +72,19 @@ class TicketController extends APIController
      */
     public function replace(ReplaceTicketRequest $request, Ticket $ticket): TicketResource
     {
+        $ticket->update($request->mappedAttributes());
+
+        return new TicketResource($ticket);
+    }
+
+    /**
+     * PATCH /api/v1/tickets/{ticket}
+     * Updates only the fields that were sent (see UpdateTicketRequest): for example just the
+     * status, just the priority, or just the assignee.
+     */
+    public function update(UpdateTicketRequest $request, Ticket $ticket): TicketResource
+    {
+        // mappedAttributes() returns only the keys present in the request
         $ticket->update($request->mappedAttributes());
 
         return new TicketResource($ticket);
