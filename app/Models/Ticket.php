@@ -8,6 +8,7 @@ use Database\Factories\TicketFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 
 /**
@@ -49,5 +50,25 @@ class Ticket extends Model
             'status' => TicketStatus::class,
             'priority' => TicketPriority::class,
         ];
+    }
+
+    /**
+     * The user who raised the ticket, found through the created_by column.
+     *
+     * @return BelongsTo<User, $this>
+     */
+    public function author(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * The user the ticket is assigned to, found through the assigned_to column.
+     *
+     * @return BelongsTo<User, $this>
+     */
+    public function assignee(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'assigned_to');
     }
 }

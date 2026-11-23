@@ -33,3 +33,15 @@ it('casts status and priority to their enums', function () {
         ->status->toBe(TicketStatus::InProgress)
         ->priority->toBe(TicketPriority::Urgent);
 });
+
+it('links a ticket to its author and assignee', function () {
+    $author = User::factory()->create();
+    $assignee = User::factory()->create();
+    $ticket = Ticket::factory()->recycle($author)->assigned($assignee)->create();
+
+    expect($ticket->author->is($author))->toBeTrue()
+        ->and($ticket->assignee->is($assignee))->toBeTrue()
+        ->and($author->tickets->modelKeys())->toBe([$ticket->id])
+        ->and($assignee->assignedTickets->modelKeys())->toBe([$ticket->id])
+        ->and($assignee->tickets)->toBeEmpty();
+});

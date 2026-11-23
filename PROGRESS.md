@@ -16,7 +16,7 @@ Statuses: Not Started · In Progress · Completed · Blocked
 | 7 | How to Version Your API | Completed |
 | 8 | Authentication with JWT | Completed |
 | 9 | Designing Response Payloads | Completed |
-| 10 | Conditionally Omitting and Including Data | Not Started |
+| 10 | Conditionally Omitting and Including Data | Completed |
 | 11 | Using Optional Parameters to Load Optional Data | Not Started |
 | 12 | Writing Filters | Not Started |
 | 13 | Using (and Filtering) Nested Resources | Not Started |
@@ -105,4 +105,12 @@ Statuses: Not Started · In Progress · Completed · Blocked
 - **Files:** `app/Http/Resources/V1/TicketResource.php` (new), `app/Http/Controllers/Api/V1/TicketController.php`, `routes/api_v1.php`, `tests/Feature/Api/V1/TicketControllerTest.php`.
 - **Testing:** 24 tests passing (resource structure, 15 per page, page 2, show, null assignee, 404 for a missing ticket, 401 without a token).
 - **Commit:** `Designing Response Payloads`
+- **Status:** Completed
+
+## Lesson 10: Conditionally Omitting and Including Data
+- **Concepts:** `when()`, `mergeWhen()` and `whenLoaded()` for per-endpoint fields; `belongsTo` / `hasMany` relationships; a read-only authors view kept apart from user management.
+- **Ticket implementation:** `Ticket::author()` (`created_by`) and `Ticket::assignee()` (`assigned_to`); `User::tickets()` and `User::assignedTickets()`. `UserResource` shows the email-verified date and timestamps only on `authors.*` and `users.*` routes. `AuthorsController` lists users who raised at least one ticket. `TicketResource` hides `description` on `tickets.index` and `users.tickets.index`, and links the author (and the assignee, when there is one) to `/authors/{id}`.
+- **Files:** `app/Models/Ticket.php`, `app/Models/User.php`, `app/Http/Resources/V1/UserResource.php` (new), `app/Http/Resources/V1/TicketResource.php`, `app/Http/Controllers/Api/V1/AuthorsController.php` (new), `routes/api_v1.php`, `tests/Feature/Api/V1/AuthorsControllerTest.php` (new), `tests/Feature/Api/V1/TicketControllerTest.php`, `tests/Feature/Models/TicketTest.php`.
+- **Testing:** 30 tests passing (no description on the list, description on the detail, author/assignee links, authors list filtered to ticket authors, author detail timestamps, 404, 401, relationships).
+- **Commit:** `Conditionally Omitting and Including Data`
 - **Status:** Completed

@@ -28,7 +28,11 @@ class TicketResource extends JsonResource
             'attributes' => [
                 'ticketNumber' => $this->ticket_number,
                 'title' => $this->title,
-                'description' => $this->description,
+                // Shown on the detail page only: hidden on the list endpoints
+                'description' => $this->when(
+                    ! $request->routeIs(['tickets.index', 'users.tickets.index']),
+                    $this->description
+                ),
                 'status' => $this->status,
                 'priority' => $this->priority,
                 'createdAt' => $this->created_at,
@@ -41,12 +45,22 @@ class TicketResource extends JsonResource
                         'type' => 'user',
                         'id' => $this->created_by,
                     ],
+                    // Link to the author's own endpoint
+                    'links' => [
+                        'self' => route('authors.show', ['author' => $this->created_by]),
+                    ],
                 ],
                 'assignee' => [
                     'data' => $this->assigned_to === null ? null : [
                         'type' => 'user',
                         'id' => $this->assigned_to,
                     ],
+                    // Link to the assignee's user endpoint, only when the ticket is assigned
+                    $this->mergeWhen($this->assigned_to !== null, fn (): array => [
+                        'links' => [
+                            'self' => route('authors.show', ['author' => $this->assigned_to]),
+                        ],
+                    ]),
                 ],
             ],
             // Link to this ticket

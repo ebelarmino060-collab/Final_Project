@@ -20,13 +20,22 @@ describe('index', function () {
                 'data' => [[
                     'type',
                     'id',
-                    'attributes' => ['ticketNumber', 'title', 'description', 'status', 'priority', 'createdAt', 'updatedAt'],
-                    'relationships' => ['author' => ['data' => ['type', 'id']], 'assignee'],
+                    'attributes' => ['ticketNumber', 'title', 'status', 'priority', 'createdAt', 'updatedAt'],
+                    'relationships' => ['author' => ['data' => ['type', 'id'], 'links' => ['self']], 'assignee'],
                     'links' => ['self'],
                 ]],
                 'links' => ['first', 'last', 'prev', 'next'],
                 'meta' => ['current_page', 'last_page', 'per_page', 'total'],
             ]);
+    });
+
+    it('does not include the description on the list', function () {
+        Ticket::factory()->create();
+
+        $this->withToken(jwtFor($this->user))
+            ->getJson('/api/v1/tickets')
+            ->assertOk()
+            ->assertJsonMissingPath('data.0.attributes.description');
     });
 
     it('returns the remaining tickets on page 2', function () {
@@ -60,10 +69,13 @@ describe('show', function () {
             ->assertJsonPath('data.id', $ticket->id)
             ->assertJsonPath('data.attributes.ticketNumber', $ticket->ticket_number)
             ->assertJsonPath('data.attributes.title', $ticket->title)
+            ->assertJsonPath('data.attributes.description', $ticket->description)
             ->assertJsonPath('data.attributes.status', 'pending')
             ->assertJsonPath('data.attributes.priority', 'high')
             ->assertJsonPath('data.relationships.author.data.id', $ticket->created_by)
+            ->assertJsonPath('data.relationships.author.links.self', route('authors.show', $ticket->created_by))
             ->assertJsonPath('data.relationships.assignee.data.id', $assignee->id)
+            ->assertJsonPath('data.relationships.assignee.links.self', route('authors.show', $assignee))
             ->assertJsonPath('data.links.self', route('tickets.show', $ticket));
     });
 
@@ -73,7 +85,8 @@ describe('show', function () {
         $this->withToken(jwtFor($this->user))
             ->getJson("/api/v1/tickets/{$ticket->id}")
             ->assertOk()
-            ->assertJsonPath('data.relationships.assignee.data', null);
+            ->assertJsonPath('data.relationships.assignee.data', null)
+            ->assertJsonMissingPath('data.relationships.assignee.links');
     });
 
     it('returns 404 for a ticket that does not exist', function () {
