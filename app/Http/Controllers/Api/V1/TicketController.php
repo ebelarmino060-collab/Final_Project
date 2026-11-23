@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Filters\V1\TicketFilter;
+use App\Http\Requests\Api\V1\ReplaceTicketRequest;
 use App\Http\Requests\Api\V1\StoreTicketRequest;
 use App\Http\Resources\V1\TicketResource;
 use App\Models\Ticket;
@@ -62,6 +63,17 @@ class TicketController extends APIController
         $ticket->delete();
 
         return $this->ok('Ticket successfully deleted');
+    }
+
+    /**
+     * PUT /api/v1/tickets/{ticket}
+     * Replaces the whole ticket: every field must be sent (see ReplaceTicketRequest).
+     */
+    public function replace(ReplaceTicketRequest $request, Ticket $ticket): TicketResource
+    {
+        $ticket->update($request->mappedAttributes());
+
+        return new TicketResource($ticket);
     }
 
     /**

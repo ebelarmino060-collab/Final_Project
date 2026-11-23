@@ -23,7 +23,7 @@ Statuses: Not Started · In Progress · Completed · Blocked
 | 14 | Sorting Data | Completed |
 | 15 | Creating Resources with POST Requests | Completed |
 | 16 | Deleting Resources with DELETE Requests | Completed |
-| 17 | Replacing Resources with PUT Requests | Not Started |
+| 17 | Replacing Resources with PUT Requests | Completed |
 | 18 | Updating Resources with PATCH Requests | Not Started |
 | 19 | Using Policies for User Authorization | Not Started |
 | 20 | Controlling Access with Token Abilities | Not Started |
@@ -164,4 +164,12 @@ Statuses: Not Started · In Progress · Completed · Blocked
 - **Files:** `app/Http/Controllers/Api/V1/TicketController.php`, `routes/api_v1.php`, `tests/Feature/Api/V1/TicketControllerTest.php`.
 - **Testing:** 76 tests passing (200 + row removed, a second DELETE and a GET return 404, 401 leaves the row in place).
 - **Commit:** `Deleting Resources with Delete Request`
+- **Status:** Completed
+
+## Lesson 17: Replacing Resources with PUT Requests
+- **Concepts:** PUT replaces the whole resource (every field `required`, idempotent); PATCH changes only what is sent. They are split into `replace()` and `update()`.
+- **Ticket implementation:** `ReplaceTicketRequest` requires title, description, status, priority, author and an assignee key (`present` + `nullable`, so a PUT can unassign). `TicketController@replace` and a manual `PUT tickets/{ticket}` route. `ticket_number` is never replaced.
+- **Files:** `app/Http/Requests/Api/V1/ReplaceTicketRequest.php` (new), `app/Http/Controllers/Api/V1/TicketController.php`, `routes/api_v1.php`, `tests/Feature/Api/V1/TicketControllerTest.php`.
+- **Testing:** 79 tests passing (full replace including unassign and author change, ticket number preserved, 422 for missing fields leaves the row unchanged, 404).
+- **Commit:** `Replacing Resources with Put Requests`
 - **Status:** Completed

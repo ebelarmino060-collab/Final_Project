@@ -22,6 +22,8 @@ Route::middleware('auth:api')->group(function () {
 
     // GET /tickets, GET /tickets/{ticket}, POST /tickets and DELETE /tickets/{ticket}
     Route::apiResource('tickets', TicketController::class)->only(['index', 'show', 'store', 'destroy']);
+    // PUT replaces the whole ticket (our own method name: replace)
+    Route::put('tickets/{ticket}', [TicketController::class, 'replace']);
 
     // Authors are read only: list and show
     Route::apiResource('authors', AuthorsController::class)->only(['index', 'show']);

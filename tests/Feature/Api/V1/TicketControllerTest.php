@@ -248,3 +248,50 @@ describe('destroy', function () {
         $this->assertModelExists($ticket);
     });
 });
+
+describe('replace', function () {
+    it('replaces every field of the ticket', function () {
+        $ticket = Ticket::factory()->assigned()->create(['ticket_number' => 'TCK-20260101-KEEP01']);
+        $newAuthor = User::factory()->create();
+
+        $this->withToken(jwtFor($this->user))
+            ->putJson("/api/v1/tickets/{$ticket->id}", ticketPayload(
+                ['title' => 'Replaced', 'description' => 'Replaced via PUT.', 'status' => 'resolved', 'priority' => 'low'],
+                ['author' => $newAuthor->id, 'assignee' => null],
+            ))
+            ->assertOk()
+            ->assertJsonPath('data.attributes.title', 'Replaced')
+            ->assertJsonPath('data.attributes.status', 'resolved');
+
+        expect($ticket->fresh())
+            ->title->toBe('Replaced')
+            ->description->toBe('Replaced via PUT.')
+            ->priority->value->toBe('low')
+            ->created_by->toBe($newAuthor->id)
+            ->assigned_to->toBeNull()
+            ->ticket_number->toBe('TCK-20260101-KEEP01');
+    });
+
+    it('returns 422 and changes nothing when fields are missing', function () {
+        $ticket = Ticket::factory()->create(['status' => 'open']);
+
+        $this->withToken(jwtFor($this->user))
+            ->putJson("/api/v1/tickets/{$ticket->id}", ['data' => ['attributes' => ['status' => 'closed']]])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors([
+                'data.attributes.title' => 'The data.attributes.title field is required.',
+                'data.attributes.description' => 'The data.attributes.description field is required.',
+                'data.attributes.priority' => 'The data.attributes.priority field is required.',
+                'data.relationships.author.data.id' => 'The data.relationships.author.data.id field is required.',
+                'data.relationships.assignee' => 'The data.relationships.assignee field is required.',
+            ]);
+
+        expect($ticket->fresh()->status->value)->toBe('open');
+    });
+
+    it('returns 404 for a ticket that does not exist', function () {
+        $this->withToken(jwtFor($this->user))
+            ->putJson('/api/v1/tickets/9999', ticketPayload([], ['author' => $this->user->id, 'assignee' => null]))
+            ->assertNotFound();
+    });
+});
