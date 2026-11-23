@@ -30,7 +30,7 @@ Statuses: Not Started · In Progress · Completed · Blocked
 | 21 | Applying Granular Permissions | Completed |
 | 22 | Implementing the Users Products Controller | Completed |
 | 23 | Managing Users | Completed |
-| 24 | The Principle of Least Privilege | Not Started |
+| 24 | The Principle of Least Privilege | Completed |
 | 25 | Handling Errors | Not Started |
 | 26 | API Documentation with Scribe | Not Started |
 | 27 | Appendix A: Where Each File Is Finished | Not Started |
@@ -221,4 +221,13 @@ Statuses: Not Started · In Progress · Completed · Blocked
 - **Files:** `app/Policies/V1/UserPolicy.php` (new), `app/Http/Requests/Api/V1/BaseUserRequest.php`, `StoreUserRequest.php`, `ReplaceUserRequest.php`, `UpdateUserRequest.php` (new), `app/Http/Controllers/Api/V1/UserController.php` (new), `app/Http/Resources/V1/UserResource.php`, `app/Providers/AppServiceProvider.php`, `routes/api_v1.php`, `tests/Feature/Api/V1/UserControllerTest.php` (new), `tests/Feature/Policies/V1/UserPolicyTest.php` (new).
 - **Testing:** 134 tests passing (UserPolicy matrix; list with filters; show with isManager and included tickets; manager create with a hashed password; regular create 403; 422 for a taken email or short password; replace keeping the same email; replace 422; promotion by a manager 200 and self-promotion 403; delete by a manager 200 and by a regular user 403).
 - **Commit:** `Managing Users`
+- **Status:** Completed
+
+## Lesson 24: The Principle of Least Privilege
+- **Concepts:** deny by default and grant explicitly, so a forgotten ability fails closed rather than open.
+- **Ticket implementation:** `StoreTicketRequest`: by default the author must be the caller (`size:{id}`) and the assignee is prohibited; only `ticket:create` lifts both. `UpdateTicketRequest`: by default the author and assignee are prohibited; only `ticket:update` lifts that. Behaviour for managers and regular users is unchanged.
+- **Where else the principle applies:** regular tokens never carry `ticket:replace`, `ticket:create` or any `user:*` ability; each token carries only its owner's abilities; only register and login are outside `auth:api`; and `UserResource` shows timestamps only on author/user routes.
+- **Files:** `app/Http/Requests/Api/V1/StoreTicketRequest.php`, `app/Http/Requests/Api/V1/UpdateTicketRequest.php`, `tests/Feature/Api/V1/TicketControllerTest.php`.
+- **Testing:** 136 tests passing. New tests use a token with **no** abilities: changing the author returns 422 prohibited, and creating for someone else returns 422. Both tests were confirmed to fail against the Lesson 21 (allow-by-default) rules.
+- **Commit:** `The Principle of Least Privilege`
 - **Status:** Completed

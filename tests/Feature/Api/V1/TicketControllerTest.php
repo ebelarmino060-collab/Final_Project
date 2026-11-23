@@ -465,3 +465,36 @@ it('returns 403 and changes nothing when a user updates a ticket someone else ra
 
     expect($ticket->fresh()->title)->toBe('Original');
 });
+
+describe('least privilege', function () {
+    it('prohibits changing the author for a token that holds no abilities at all', function () {
+        $ticket = Ticket::factory()->recycle($this->user)->create();
+        app('auth')->forgetGuards();
+        $tokenWithoutAbilities = JWTAuth::claims(['abilities' => []])->fromUser($this->user);
+
+        $this->withToken($tokenWithoutAbilities)
+            ->patchJson("/api/v1/tickets/{$ticket->id}", ['data' => ['relationships' => ['author' => ['data' => ['id' => User::factory()->create()->id]]]]])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors([
+                'data.relationships.author.data.id' => 'The data.relationships.author.data.id field is prohibited.',
+            ]);
+
+        expect($ticket->fresh()->created_by)->toBe($this->user->id);
+    });
+
+    it('requires a token without abilities to be the author and refuses the ticket in the policy', function () {
+        app('auth')->forgetGuards();
+        $tokenWithoutAbilities = JWTAuth::claims(['abilities' => []])->fromUser($this->user);
+
+        $this->withToken($tokenWithoutAbilities)
+            ->postJson('/api/v1/tickets', ticketPayload([], ['author' => User::factory()->create()->id]))
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['data.relationships.author.data.id' => "The data.relationships.author.data.id field must be {$this->user->id}."]);
+
+        $this->withToken($tokenWithoutAbilities)
+            ->postJson('/api/v1/tickets', ticketPayload([], ['author' => $this->user->id]))
+            ->assertForbidden();
+
+        expect(Ticket::count())->toBe(0);
+    });
+});

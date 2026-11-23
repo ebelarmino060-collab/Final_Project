@@ -19,6 +19,7 @@ class UpdateTicketRequest extends BaseTicketRequest
     }
 
     /**
+     * Validation rules for updating a ticket (deny by default).
      * "sometimes" means: validate the field only when it was sent.
      *
      * @return array<string, ValidationRule|array<mixed>|string>
@@ -30,15 +31,16 @@ class UpdateTicketRequest extends BaseTicketRequest
             'data.attributes.description' => ['sometimes', 'string'],
             'data.attributes.status' => ['sometimes', 'string', Rule::enum(TicketStatus::class)],
             'data.attributes.priority' => ['sometimes', 'string', Rule::enum(TicketPriority::class)],
-            'data.relationships.author.data.id' => ['sometimes', 'integer', 'exists:users,id'],
-            // null unassigns the ticket
-            'data.relationships.assignee.data.id' => ['sometimes', 'nullable', 'integer', 'exists:users,id'],
+            // Default: nobody may change the author or the assignee
+            'data.relationships.author.data.id' => ['prohibited'],
+            'data.relationships.assignee.data.id' => ['prohibited'],
         ];
 
-        // Users who may only update their own tickets cannot change the author or the assignee
-        if ($this->user()->tokenCan(Abilities::UpdateOwnTicket)) {
-            $rules['data.relationships.author.data.id'] = ['prohibited'];
-            $rules['data.relationships.assignee.data.id'] = ['prohibited'];
+        // Only the broad ability lifts the restriction (managers)
+        if ($this->user()->tokenCan(Abilities::UpdateTicket)) {
+            $rules['data.relationships.author.data.id'] = ['sometimes', 'integer', 'exists:users,id'];
+            // null unassigns the ticket
+            $rules['data.relationships.assignee.data.id'] = ['sometimes', 'nullable', 'integer', 'exists:users,id'];
         }
 
         return $rules;

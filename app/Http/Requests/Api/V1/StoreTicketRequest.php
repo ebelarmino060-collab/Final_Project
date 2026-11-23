@@ -23,13 +23,16 @@ class StoreTicketRequest extends BaseTicketRequest
     }
 
     /**
-     * Validation rules for creating a ticket.
+     * Validation rules for creating a ticket (deny by default).
      *
      * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         $authorIdAttribute = $this->authorIdAttribute();
+        $user = $this->user();
+        $authorRule = ['required', 'integer', 'exists:users,id'];
+        $assigneeRule = ['sometimes', 'nullable', 'integer', 'exists:users,id'];
 
         $rules = [
             'data' => ['required', 'array'],
@@ -39,17 +42,16 @@ class StoreTicketRequest extends BaseTicketRequest
             // Optional on create: a new ticket is open with medium priority unless told otherwise
             'data.attributes.status' => ['sometimes', 'string', Rule::enum(TicketStatus::class)],
             'data.attributes.priority' => ['sometimes', 'string', Rule::enum(TicketPriority::class)],
-            $authorIdAttribute => ['required', 'integer', 'exists:users,id'],
-            'data.relationships.assignee.data.id' => ['sometimes', 'nullable', 'integer', 'exists:users,id'],
+            // Default: the author must be the logged-in user (size:5 means the id must equal 5)
+            $authorIdAttribute => [...$authorRule, 'size:'.$user->id],
+            // Default: nobody may assign the new ticket
+            'data.relationships.assignee.data.id' => ['prohibited'],
         ];
 
-        // A user who may only create their own tickets must be the author
-        // (size:5 means the id must equal 5, the logged-in user's id) and may not assign it
-        $user = $this->user();
-
-        if ($user->tokenCan(Abilities::CreateOwnTicket)) {
-            $rules[$authorIdAttribute][] = 'size:'.$user->id;
-            $rules['data.relationships.assignee.data.id'] = ['prohibited'];
+        // Only the broad ability lifts both restrictions (managers)
+        if ($user->tokenCan(Abilities::CreateTicket)) {
+            $rules[$authorIdAttribute] = $authorRule;
+            $rules['data.relationships.assignee.data.id'] = $assigneeRule;
         }
 
         return $rules;
