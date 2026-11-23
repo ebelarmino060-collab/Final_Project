@@ -18,7 +18,7 @@ Statuses: Not Started · In Progress · Completed · Blocked
 | 9 | Designing Response Payloads | Completed |
 | 10 | Conditionally Omitting and Including Data | Completed |
 | 11 | Using Optional Parameters to Load Optional Data | Completed |
-| 12 | Writing Filters | Not Started |
+| 12 | Writing Filters | Completed |
 | 13 | Using (and Filtering) Nested Resources | Not Started |
 | 14 | Sorting Data | Not Started |
 | 15 | Creating Resources with POST Requests | Not Started |
@@ -121,4 +121,13 @@ Statuses: Not Started · In Progress · Completed · Blocked
 - **Files:** `app/Http/Controllers/Api/V1/APIController.php` (new), `app/Http/Controllers/Api/V1/TicketController.php`, `app/Http/Controllers/Api/V1/AuthorsController.php`, `app/Http/Resources/V1/TicketResource.php`, `app/Http/Resources/V1/UserResource.php`, `tests/Feature/Api/V1/TicketControllerTest.php`, `tests/Feature/Api/V1/AuthorsControllerTest.php`.
 - **Testing:** 37 tests passing (includes absent by default, author on the list, author + assignee on detail, a single eager-load query for a page, author tickets on detail and list).
 - **Commit:** `Using Optional Parameters to Load Optional Data`
+- **Status:** Completed
+
+## Lesson 12: Writing Filters
+- **Concepts:** a reusable filter engine. A `QueryFilter` base calls one method per query parameter; a child filter class lists the allowed parameters; a model `scopeFilter()`. A comma means a list or range, and `*` is a wildcard.
+- **Ticket implementation:** `QueryFilter` (with shared `likeValue()` and `filterDate()` helpers) and `TicketFilter` with `status`, `priority`, `title`, `ticketNumber`, `search` (ticket number **or** title), `createdBy`, `assignedTo`, `createdAt`, `updatedAt` and `include` (allow-list: author, assignee). `Ticket::scopeFilter()`. `TicketController@index(TicketFilter $filters)`.
+- **Adjustments (hardening):** the filter reads only the query string (`query()` rather than `all()`) and skips array values (`?status[]=x`), which would otherwise cause a 500. Pagination links keep the filters (`withQueryString()`).
+- **Files:** `app/Http/Filters/V1/QueryFilter.php` (new), `app/Http/Filters/V1/TicketFilter.php` (new), `app/Models/Ticket.php`, `app/Http/Controllers/Api/V1/TicketController.php`, `tests/Feature/Http/Filters/V1/TicketFilterTest.php` (new).
+- **Testing:** 51 tests passing (each filter, a combination, the include allow-list, unknown/array parameters ignored, filters kept on pagination links).
+- **Commit:** `Writing Filters`
 - **Status:** Completed

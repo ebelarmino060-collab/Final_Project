@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Http\Filters\V1\TicketFilter;
 use App\Http\Resources\V1\TicketResource;
 use App\Models\Ticket;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -19,11 +20,12 @@ class TicketController extends APIController
      * GET /api/v1/tickets
      * Returns a paginated list (15 per page). Each ticket is transformed by TicketResource.
      */
-    public function index(): AnonymousResourceCollection
+    public function index(TicketFilter $filters): AnonymousResourceCollection
     {
-        // ?include=author,assignee: eager load them in one extra query each (no N+1)
+        // Apply the filters from the URL (?status=open, ?search=printer, ?include=author ...)
+        // withQueryString() keeps those filters on the pagination links
         return TicketResource::collection(
-            Ticket::with($this->requestedIncludes())->paginate()
+            Ticket::filter($filters)->paginate()->withQueryString()
         );
     }
 
