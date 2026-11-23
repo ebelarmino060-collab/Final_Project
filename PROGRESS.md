@@ -15,7 +15,7 @@ Statuses: Not Started · In Progress · Completed · Blocked
 | 6 | Designing the URL | Completed |
 | 7 | How to Version Your API | Completed |
 | 8 | Authentication with JWT | Completed |
-| 9 | Designing Response Payloads | Not Started |
+| 9 | Designing Response Payloads | Completed |
 | 10 | Conditionally Omitting and Including Data | Not Started |
 | 11 | Using Optional Parameters to Load Optional Data | Not Started |
 | 12 | Writing Filters | Not Started |
@@ -97,4 +97,12 @@ Statuses: Not Started · In Progress · Completed · Blocked
 - **Files:** `composer.json`, `composer.lock`, `config/jwt.php` (new), `config/auth.php`, `app/Models/User.php`, `app/Http/Requests/Api/RegisterUserRequest.php` (new), `app/Http/Requests/Api/LoginUserRequest.php` (new), `app/Http/Controllers/Api/V1/AuthController.php` (new), `routes/api_v1.php`, `phpunit.xml`, `.env.example`, `tests/Pest.php` (`jwtFor()` helper), `tests/Feature/Api/V1/AuthControllerTest.php` (new), `tests/Feature/Api/V1/TicketControllerTest.php`.
 - **Testing:** 20 tests passing (register, duplicate email / unconfirmed password 422, login, wrong password 401, me, 401 without a token, refresh blacklists the old token, logout revokes the token). Live check with `php artisan serve`: register → me → tickets returned 200, and 401 without a token.
 - **Commit:** `Authenticate/Revoking Authenticated Tokens using JWT`
+- **Status:** Completed
+
+## Lesson 9: Designing Response Payloads
+- **Concepts:** API Resources as transformers that decouple JSON from table columns, the JSON:API shape (type / id / attributes / relationships / links), and `paginate()` with `links` and `meta`.
+- **Ticket implementation:** `TicketResource` with camelCase attributes (`ticketNumber`, `title`, `description`, `status`, `priority`, `createdAt`, `updatedAt`) and two relationships: `author` (`created_by`) and `assignee` (`assigned_to`, `null` when unassigned). `index()` paginates 15 per page; `show(Ticket $ticket)` uses route model binding.
+- **Files:** `app/Http/Resources/V1/TicketResource.php` (new), `app/Http/Controllers/Api/V1/TicketController.php`, `routes/api_v1.php`, `tests/Feature/Api/V1/TicketControllerTest.php`.
+- **Testing:** 24 tests passing (resource structure, 15 per page, page 2, show, null assignee, 404 for a missing ticket, 401 without a token).
+- **Commit:** `Designing Response Payloads`
 - **Status:** Completed

@@ -18,5 +18,6 @@ Route::middleware('auth:api')->group(function () {
         Route::post('refresh', [AuthController::class, 'refresh']);
     });
 
-    Route::apiResource('tickets', TicketController::class)->only(['index']);
+    // GET /tickets (list) and GET /tickets/{ticket} (one ticket)
+    Route::apiResource('tickets', TicketController::class)->only(['index', 'show']);
 });
