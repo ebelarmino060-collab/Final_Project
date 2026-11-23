@@ -4,6 +4,7 @@ namespace App\Http\Requests\Api\V1;
 
 use App\Enums\TicketPriority;
 use App\Enums\TicketStatus;
+use App\Permissions\V1\Abilities;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Validation\Rule;
 
@@ -24,7 +25,7 @@ class UpdateTicketRequest extends BaseTicketRequest
      */
     public function rules(): array
     {
-        return [
+        $rules = [
             'data.attributes.title' => ['sometimes', 'string', 'max:255'],
             'data.attributes.description' => ['sometimes', 'string'],
             'data.attributes.status' => ['sometimes', 'string', Rule::enum(TicketStatus::class)],
@@ -33,5 +34,13 @@ class UpdateTicketRequest extends BaseTicketRequest
             // null unassigns the ticket
             'data.relationships.assignee.data.id' => ['sometimes', 'nullable', 'integer', 'exists:users,id'],
         ];
+
+        // Users who may only update their own tickets cannot change the author or the assignee
+        if ($this->user()->tokenCan(Abilities::UpdateOwnTicket)) {
+            $rules['data.relationships.author.data.id'] = ['prohibited'];
+            $rules['data.relationships.assignee.data.id'] = ['prohibited'];
+        }
+
+        return $rules;
     }
 }

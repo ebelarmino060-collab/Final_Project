@@ -27,7 +27,7 @@ Statuses: Not Started · In Progress · Completed · Blocked
 | 18 | Updating Resources with PATCH Requests | Completed |
 | 19 | Using Policies for User Authorization | Completed |
 | 20 | Controlling Access with Token Abilities | Completed |
-| 21 | Applying Granular Permissions | Not Started |
+| 21 | Applying Granular Permissions | Completed |
 | 22 | Implementing the Users Products Controller | Not Started |
 | 23 | Managing Users | Not Started |
 | 24 | The Principle of Least Privilege | Not Started |
@@ -196,4 +196,12 @@ Statuses: Not Started · In Progress · Completed · Blocked
 - **Files:** `app/Permissions/V1/Abilities.php` (new), `database/migrations/*_add_is_manager_to_users_table.php` (new), `database/factories/UserFactory.php`, `database/seeders/DatabaseSeeder.php`, `app/Models/User.php`, `app/Policies/V1/TicketPolicy.php`, `app/Http/Controllers/Api/V1/TicketController.php`, `tests/Feature/Permissions/V1/AbilitiesTest.php` (new), `tests/Feature/Policies/V1/TicketPolicyTest.php`, `tests/Feature/Api/V1/TicketControllerTest.php`.
 - **Testing:** 102 tests passing (full policy matrix, no token means no abilities, abilities in the login token, manager deletes any ticket, 403 deleting someone else's ticket, regular PUT 403, manager PUT 200). Live check after `migrate:fresh --seed`: the decoded manager and regular tokens show the right abilities, and PUT on another user's ticket returns 403 for a regular user and 200 for the manager.
 - **Commit:** `Controlling Access with Token Abilities`
+- **Status:** Completed
+
+## Lesson 21: Applying Granular Permissions
+- **Concepts:** abilities can be checked anywhere, including Form Requests, which run before the controller. Fine-grained rules: the `size:` rule forces the author id to equal the caller's id, and `prohibited` forbids a field.
+- **Ticket implementation:** in `StoreTicketRequest`, a user holding `ticket:own:create` must be the author (`size:{id}`) and may not set an assignee. In `UpdateTicketRequest`, a user holding `ticket:own:update` may not change the author or the assignee. Managers skip both restrictions, so **assigning tickets is a manager action** ("assign a ticket to an authorized user").
+- **Files:** `app/Http/Requests/Api/V1/StoreTicketRequest.php`, `app/Http/Requests/Api/V1/UpdateTicketRequest.php`, `tests/Feature/Api/V1/TicketControllerTest.php` (assignment tests now use a manager).
+- **Testing:** 107 tests passing (regular user creates for self 201; for someone else 422 "must be {id}"; assigning on create 422 prohibited; changing author/assignee on own ticket 422 and unchanged; manager creates for anyone, assigns/unassigns and moves the author).
+- **Commit:** `Applying Granular Permissions`
 - **Status:** Completed

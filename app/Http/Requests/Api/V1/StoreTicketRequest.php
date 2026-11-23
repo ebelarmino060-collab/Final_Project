@@ -4,6 +4,7 @@ namespace App\Http\Requests\Api\V1;
 
 use App\Enums\TicketPriority;
 use App\Enums\TicketStatus;
+use App\Permissions\V1\Abilities;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Validation\Rule;
 
@@ -28,7 +29,9 @@ class StoreTicketRequest extends BaseTicketRequest
      */
     public function rules(): array
     {
-        return [
+        $authorIdAttribute = $this->authorIdAttribute();
+
+        $rules = [
             'data' => ['required', 'array'],
             'data.attributes' => ['required', 'array'],
             'data.attributes.title' => ['required', 'string', 'max:255'],
@@ -36,9 +39,20 @@ class StoreTicketRequest extends BaseTicketRequest
             // Optional on create: a new ticket is open with medium priority unless told otherwise
             'data.attributes.status' => ['sometimes', 'string', Rule::enum(TicketStatus::class)],
             'data.attributes.priority' => ['sometimes', 'string', Rule::enum(TicketPriority::class)],
-            $this->authorIdAttribute() => ['required', 'integer', 'exists:users,id'],
+            $authorIdAttribute => ['required', 'integer', 'exists:users,id'],
             'data.relationships.assignee.data.id' => ['sometimes', 'nullable', 'integer', 'exists:users,id'],
         ];
+
+        // A user who may only create their own tickets must be the author
+        // (size:5 means the id must equal 5, the logged-in user's id) and may not assign it
+        $user = $this->user();
+
+        if ($user->tokenCan(Abilities::CreateOwnTicket)) {
+            $rules[$authorIdAttribute][] = 'size:'.$user->id;
+            $rules['data.relationships.assignee.data.id'] = ['prohibited'];
+        }
+
+        return $rules;
     }
 
     /**

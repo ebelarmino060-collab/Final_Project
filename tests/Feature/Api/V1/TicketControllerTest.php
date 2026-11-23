@@ -144,10 +144,10 @@ describe('include', function () {
 });
 
 describe('store', function () {
-    it('creates a ticket and returns 201 with a generated ticket number', function () {
+    it('lets a manager create an assigned ticket for any author and returns 201 with a generated ticket number', function () {
         $assignee = User::factory()->create();
 
-        $response = $this->withToken(jwtFor($this->user))
+        $response = $this->withToken(jwtFor(User::factory()->manager()->create()))
             ->postJson('/api/v1/tickets', ticketPayload(
                 ['title' => 'VPN down', 'priority' => 'urgent'],
                 ['author' => $this->user->id, 'assignee' => $assignee->id],
@@ -205,8 +205,37 @@ describe('store', function () {
             ]);
     });
 
-    it('returns 422 for an author or assignee that does not exist', function () {
+    it('lets a regular user create a ticket for themselves', function () {
         $this->withToken(jwtFor($this->user))
+            ->postJson('/api/v1/tickets', ticketPayload([], ['author' => $this->user->id]))
+            ->assertCreated()
+            ->assertJsonPath('data.relationships.author.data.id', $this->user->id);
+    });
+
+    it('returns 422 when a regular user creates a ticket for someone else', function () {
+        $other = User::factory()->create();
+
+        $this->withToken(jwtFor($this->user))
+            ->postJson('/api/v1/tickets', ticketPayload([], ['author' => $other->id]))
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors([
+                'data.relationships.author.data.id' => "The data.relationships.author.data.id field must be {$this->user->id}.",
+            ]);
+
+        expect(Ticket::count())->toBe(0);
+    });
+
+    it('returns 422 when a regular user assigns the new ticket', function () {
+        $this->withToken(jwtFor($this->user))
+            ->postJson('/api/v1/tickets', ticketPayload([], ['author' => $this->user->id, 'assignee' => User::factory()->create()->id]))
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors([
+                'data.relationships.assignee.data.id' => 'The data.relationships.assignee.data.id field is prohibited.',
+            ]);
+    });
+
+    it('returns 422 for an author or assignee that does not exist', function () {
+        $this->withToken(jwtFor(User::factory()->manager()->create()))
             ->postJson('/api/v1/tickets', ticketPayload([], ['author' => 99999, 'assignee' => 99998]))
             ->assertUnprocessable()
             ->assertJsonValidationErrors([
@@ -352,10 +381,10 @@ describe('update', function () {
         expect($ticket->fresh()->priority->value)->toBe('urgent');
     });
 
-    it('assigns and then unassigns the ticket', function () {
-        $ticket = Ticket::factory()->recycle($this->user)->create();
+    it('lets a manager assign and then unassign any ticket', function () {
+        $ticket = Ticket::factory()->create();
         $assignee = User::factory()->create();
-        $token = jwtFor($this->user);
+        $token = jwtFor(User::factory()->manager()->create());
 
         $this->withToken($token)
             ->patchJson("/api/v1/tickets/{$ticket->id}", ['data' => ['relationships' => ['assignee' => ['data' => ['id' => $assignee->id]]]]])
@@ -385,12 +414,44 @@ describe('update', function () {
     });
 
     it('returns 422 when assigning a user that does not exist', function () {
-        $ticket = Ticket::factory()->recycle($this->user)->create();
+        $ticket = Ticket::factory()->create();
 
-        $this->withToken(jwtFor($this->user))
+        $this->withToken(jwtFor(User::factory()->manager()->create()))
             ->patchJson("/api/v1/tickets/{$ticket->id}", ['data' => ['relationships' => ['assignee' => ['data' => ['id' => 99999]]]]])
             ->assertUnprocessable()
-            ->assertJsonValidationErrors(['data.relationships.assignee.data.id']);
+            ->assertJsonValidationErrors([
+                'data.relationships.assignee.data.id' => 'The selected data.relationships.assignee.data.id is invalid.',
+            ]);
+    });
+
+    it('returns 422 when a regular user changes the author or the assignee of their own ticket', function () {
+        $ticket = Ticket::factory()->recycle($this->user)->create();
+        $other = User::factory()->create();
+
+        $this->withToken(jwtFor($this->user))
+            ->patchJson("/api/v1/tickets/{$ticket->id}", ['data' => ['relationships' => [
+                'author' => ['data' => ['id' => $other->id]],
+                'assignee' => ['data' => ['id' => $other->id]],
+            ]]])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors([
+                'data.relationships.author.data.id' => 'The data.relationships.author.data.id field is prohibited.',
+                'data.relationships.assignee.data.id' => 'The data.relationships.assignee.data.id field is prohibited.',
+            ]);
+
+        expect($ticket->fresh())
+            ->created_by->toBe($this->user->id)
+            ->assigned_to->toBeNull();
+    });
+
+    it('lets a manager move a ticket to another author', function () {
+        $ticket = Ticket::factory()->create();
+        $other = User::factory()->create();
+
+        $this->withToken(jwtFor(User::factory()->manager()->create()))
+            ->patchJson("/api/v1/tickets/{$ticket->id}", ['data' => ['relationships' => ['author' => ['data' => ['id' => $other->id]]]]])
+            ->assertOk()
+            ->assertJsonPath('data.relationships.author.data.id', $other->id);
     });
 });
 
