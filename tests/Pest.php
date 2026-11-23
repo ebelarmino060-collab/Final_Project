@@ -1,6 +1,8 @@
 <?php
 
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 use Tests\TestCase;
 
 /*
@@ -47,4 +49,15 @@ expect()->extend('toBeOne', function () {
 function something()
 {
     // ..
+}
+
+/**
+ * Issue a JWT for the given user, exactly as login would.
+ * The cached guards are reset so the next request authenticates this user, not a previous one.
+ */
+function jwtFor(User $user): string
+{
+    app('auth')->forgetGuards();
+
+    return JWTAuth::fromUser($user);
 }
