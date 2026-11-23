@@ -19,7 +19,7 @@ Statuses: Not Started · In Progress · Completed · Blocked
 | 10 | Conditionally Omitting and Including Data | Completed |
 | 11 | Using Optional Parameters to Load Optional Data | Completed |
 | 12 | Writing Filters | Completed |
-| 13 | Using (and Filtering) Nested Resources | Not Started |
+| 13 | Using (and Filtering) Nested Resources | Completed |
 | 14 | Sorting Data | Not Started |
 | 15 | Creating Resources with POST Requests | Not Started |
 | 16 | Deleting Resources with DELETE Requests | Not Started |
@@ -130,4 +130,12 @@ Statuses: Not Started · In Progress · Completed · Blocked
 - **Files:** `app/Http/Filters/V1/QueryFilter.php` (new), `app/Http/Filters/V1/TicketFilter.php` (new), `app/Models/Ticket.php`, `app/Http/Controllers/Api/V1/TicketController.php`, `tests/Feature/Http/Filters/V1/TicketFilterTest.php` (new).
 - **Testing:** 51 tests passing (each filter, a combination, the include allow-list, unknown/array parameters ignored, filters kept on pagination links).
 - **Commit:** `Writing Filters`
+- **Status:** Completed
+
+## Lesson 13: Using (and Filtering) Nested Resources
+- **Concepts:** nested resource URLs (`/users/{user}/tickets`) via dot notation (`users.tickets`), reusing the same filter class.
+- **Ticket implementation:** `UserTicketsController@index(User $user, TicketFilter $filters)` lists the tickets a user raised (`created_by`); every ticket filter works on the nested list, and the description is hidden there as on `/tickets`. Tickets **assigned** to a user are available through `/tickets?assignedTo={id}` (Lesson 12).
+- **Files:** `app/Http/Controllers/Api/V1/UserTicketsController.php` (new), `routes/api_v1.php`, `tests/Feature/Api/V1/UserTicketsControllerTest.php` (new).
+- **Testing:** 55 tests passing (only that user's tickets, nested list + filter, 404 for a missing user, 401).
+- **Commit:** `Using (and Filtering) Nested Resources`
 - **Status:** Completed
