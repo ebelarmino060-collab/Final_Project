@@ -63,6 +63,14 @@ class TicketResource extends JsonResource
                     ]),
                 ],
             ],
+            // The related users, present only when requested with ?include=author,assignee
+            'includes' => $this->when(
+                $this->relationLoaded('author') || $this->relationLoaded('assignee'),
+                fn (): array => [
+                    'author' => new UserResource($this->whenLoaded('author')),
+                    'assignee' => new UserResource($this->whenLoaded('assignee')),
+                ]
+            ),
             // Link to this ticket
             'links' => [
                 'self' => route('tickets.show', ['ticket' => $this->id]),

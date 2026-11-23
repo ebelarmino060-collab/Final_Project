@@ -17,7 +17,7 @@ Statuses: Not Started · In Progress · Completed · Blocked
 | 8 | Authentication with JWT | Completed |
 | 9 | Designing Response Payloads | Completed |
 | 10 | Conditionally Omitting and Including Data | Completed |
-| 11 | Using Optional Parameters to Load Optional Data | Not Started |
+| 11 | Using Optional Parameters to Load Optional Data | Completed |
 | 12 | Writing Filters | Not Started |
 | 13 | Using (and Filtering) Nested Resources | Not Started |
 | 14 | Sorting Data | Not Started |
@@ -113,4 +113,12 @@ Statuses: Not Started · In Progress · Completed · Blocked
 - **Files:** `app/Models/Ticket.php`, `app/Models/User.php`, `app/Http/Resources/V1/UserResource.php` (new), `app/Http/Resources/V1/TicketResource.php`, `app/Http/Controllers/Api/V1/AuthorsController.php` (new), `routes/api_v1.php`, `tests/Feature/Api/V1/AuthorsControllerTest.php` (new), `tests/Feature/Api/V1/TicketControllerTest.php`, `tests/Feature/Models/TicketTest.php`.
 - **Testing:** 30 tests passing (no description on the list, description on the detail, author/assignee links, authors list filtered to ticket authors, author detail timestamps, 404, 401, relationships).
 - **Commit:** `Conditionally Omitting and Including Data`
+- **Status:** Completed
+
+## Lesson 11: Using Optional Parameters to Load Optional Data
+- **Concepts:** optional `?include=` query parameters, eager loading with `with()` to avoid N+1, and a base controller for shared helpers.
+- **Ticket implementation:** `APIController::include()` parses `?include=a,b`. `TicketController` and `AuthorsController` extend it. Tickets accept `?include=author,assignee` (an allow-list, eager loaded); authors accept `?include=tickets`. `TicketResource` adds an `includes` object with `author` / `assignee` only when one is loaded; `UserResource` adds `includes` with the user's tickets.
+- **Files:** `app/Http/Controllers/Api/V1/APIController.php` (new), `app/Http/Controllers/Api/V1/TicketController.php`, `app/Http/Controllers/Api/V1/AuthorsController.php`, `app/Http/Resources/V1/TicketResource.php`, `app/Http/Resources/V1/UserResource.php`, `tests/Feature/Api/V1/TicketControllerTest.php`, `tests/Feature/Api/V1/AuthorsControllerTest.php`.
+- **Testing:** 37 tests passing (includes absent by default, author on the list, author + assignee on detail, a single eager-load query for a page, author tickets on detail and list).
+- **Commit:** `Using Optional Parameters to Load Optional Data`
 - **Status:** Completed

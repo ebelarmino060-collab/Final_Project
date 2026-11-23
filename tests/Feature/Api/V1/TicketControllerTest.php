@@ -95,3 +95,50 @@ describe('show', function () {
             ->assertNotFound();
     });
 });
+
+describe('include', function () {
+    it('omits the includes key when nothing is requested', function () {
+        $ticket = Ticket::factory()->create();
+
+        $this->withToken(jwtFor($this->user))
+            ->getJson("/api/v1/tickets/{$ticket->id}")
+            ->assertOk()
+            ->assertJsonMissingPath('data.includes');
+    });
+
+    it('includes the author on the list when requested', function () {
+        $author = User::factory()->create();
+        Ticket::factory()->recycle($author)->create();
+
+        $this->withToken(jwtFor($this->user))
+            ->getJson('/api/v1/tickets?include=author')
+            ->assertOk()
+            ->assertJsonPath('data.0.includes.author.id', $author->id)
+            ->assertJsonPath('data.0.includes.author.attributes.name', $author->name)
+            ->assertJsonMissingPath('data.0.includes.assignee');
+    });
+
+    it('includes the author and the assignee of one ticket when both are requested', function () {
+        $assignee = User::factory()->create();
+        $ticket = Ticket::factory()->assigned($assignee)->create();
+
+        $this->withToken(jwtFor($this->user))
+            ->getJson("/api/v1/tickets/{$ticket->id}?include=author,assignee")
+            ->assertOk()
+            ->assertJsonPath('data.includes.author.id', $ticket->created_by)
+            ->assertJsonPath('data.includes.assignee.id', $assignee->id);
+    });
+
+    it('eager loads the authors of the whole page in one query', function () {
+        Ticket::factory(5)->create();
+        $token = jwtFor($this->user);
+
+        DB::enableQueryLog();
+        $this->withToken($token)->getJson('/api/v1/tickets?include=author')->assertOk();
+
+        $userQueries = collect(DB::getQueryLog())
+            ->filter(fn (array $query): bool => str_contains($query['query'], 'from `users`') && str_contains($query['query'], ' in ('));
+
+        expect($userQueries)->toHaveCount(1);
+    });
+});

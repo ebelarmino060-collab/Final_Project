@@ -31,6 +31,8 @@ class UserResource extends JsonResource
                     'updatedAt' => $this->updated_at,
                 ]),
             ],
+            // The user's tickets, present only when requested with ?include=tickets
+            'includes' => TicketResource::collection($this->whenLoaded('tickets')),
             // Link to this user
             'links' => [
                 'self' => route('authors.show', ['author' => $this->id]),
