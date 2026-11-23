@@ -28,7 +28,7 @@ Statuses: Not Started · In Progress · Completed · Blocked
 | 19 | Using Policies for User Authorization | Completed |
 | 20 | Controlling Access with Token Abilities | Completed |
 | 21 | Applying Granular Permissions | Completed |
-| 22 | Implementing the Users Products Controller | Not Started |
+| 22 | Implementing the Users Products Controller | Completed |
 | 23 | Managing Users | Not Started |
 | 24 | The Principle of Least Privilege | Not Started |
 | 25 | Handling Errors | Not Started |
@@ -204,4 +204,12 @@ Statuses: Not Started · In Progress · Completed · Blocked
 - **Files:** `app/Http/Requests/Api/V1/StoreTicketRequest.php`, `app/Http/Requests/Api/V1/UpdateTicketRequest.php`, `tests/Feature/Api/V1/TicketControllerTest.php` (assignment tests now use a manager).
 - **Testing:** 107 tests passing (regular user creates for self 201; for someone else 422 "must be {id}"; assigning on create 422 prohibited; changing author/assignee on own ticket 422 and unchanged; manager creates for anyone, assigns/unassigns and moves the author).
 - **Commit:** `Applying Granular Permissions`
+- **Status:** Completed
+
+## Lesson 22: Implementing the Users Products Controller (applied as Users Tickets)
+- **Concepts:** full write operations on a nested resource; the same policy keeps the rules identical; scoped bindings (`->scoped()`, `->scopeBindings()`) return 404 for a child that does not belong to the parent; the author id comes from the URL (`mappedAttributes(['author' => 'created_by'])`).
+- **Ticket implementation:** `UserTicketsController` gains `store`, `replace`, `update` and `destroy`, each asking `TicketPolicy`. The routes are `users.tickets` (`index`, `store`, `destroy`, scoped) plus manual scoped `PUT` / `PATCH users/{user}/tickets/{ticket}`.
+- **Files:** `app/Http/Controllers/Api/V1/UserTicketsController.php`, `routes/api_v1.php`, `tests/Feature/Api/V1/UserTicketsControllerTest.php`.
+- **Testing:** 115 tests passing (create through own URL 201; under another user 422 "must be {id}"; manager under any user 201; regular PUT 403 and manager PUT 200; author PATCH + DELETE; foreign ticket under a user URL returns 404 for DELETE/PATCH/PUT; another user's DELETE 403).
+- **Commit:** `Implementing the Users Products Controller`
 - **Status:** Completed

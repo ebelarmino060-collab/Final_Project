@@ -30,6 +30,14 @@ Route::middleware('auth:api')->group(function () {
     // Authors are read only: list and show
     Route::apiResource('authors', AuthorsController::class)->only(['index', 'show']);
 
-    // Tickets raised by one user: GET /users/{user}/tickets
-    Route::apiResource('users.tickets', UserTicketsController::class)->only(['index']);
+    // Tickets raised by one user: /users/{user}/tickets
+    Route::apiResource('users.tickets', UserTicketsController::class)
+        ->only(['index', 'store', 'destroy'])
+        ->scoped(); // the ticket must belong to the user in the URL (otherwise 404)
+
+    // PUT and PATCH use our own method names, so they are registered by hand
+    Route::put('users/{user}/tickets/{ticket}', [UserTicketsController::class, 'replace'])
+        ->scopeBindings();
+    Route::patch('users/{user}/tickets/{ticket}', [UserTicketsController::class, 'update'])
+        ->scopeBindings();
 });

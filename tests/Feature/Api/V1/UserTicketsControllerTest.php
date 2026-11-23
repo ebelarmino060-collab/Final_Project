@@ -45,3 +45,97 @@ describe('index', function () {
         $this->getJson("/api/v1/users/{$this->author->id}/tickets")->assertUnauthorized();
     });
 });
+
+describe('store', function () {
+    it('creates a ticket for the user in the URL without an author in the body', function () {
+        $response = $this->withToken(jwtFor($this->author))
+            ->postJson("/api/v1/users/{$this->author->id}/tickets", ticketPayload())
+            ->assertCreated()
+            ->assertJsonPath('data.relationships.author.data.id', $this->author->id);
+
+        expect(Ticket::findOrFail($response->json('data.id'))->created_by)->toBe($this->author->id);
+    });
+
+    it('returns 422 when a regular user creates a ticket under someone else', function () {
+        $other = User::factory()->create();
+
+        $this->withToken(jwtFor($this->author))
+            ->postJson("/api/v1/users/{$other->id}/tickets", ticketPayload())
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['author' => "The author field must be {$this->author->id}."]);
+
+        expect(Ticket::count())->toBe(0);
+    });
+
+    it('lets a manager create a ticket under any user', function () {
+        $this->withToken(jwtFor(User::factory()->manager()->create()))
+            ->postJson("/api/v1/users/{$this->author->id}/tickets", ticketPayload())
+            ->assertCreated()
+            ->assertJsonPath('data.relationships.author.data.id', $this->author->id);
+    });
+});
+
+describe('replace', function () {
+    it('returns 403 when a regular user replaces their own ticket', function () {
+        $ticket = Ticket::factory()->recycle($this->author)->create();
+
+        $this->withToken(jwtFor($this->author))
+            ->putJson("/api/v1/users/{$this->author->id}/tickets/{$ticket->id}", ticketPayload([], ['author' => $this->author->id, 'assignee' => null]))
+            ->assertForbidden();
+    });
+
+    it('lets a manager replace the ticket', function () {
+        $ticket = Ticket::factory()->recycle($this->author)->create();
+
+        $this->withToken(jwtFor(User::factory()->manager()->create()))
+            ->putJson("/api/v1/users/{$this->author->id}/tickets/{$ticket->id}", ticketPayload(['title' => 'Renamed'], ['author' => $this->author->id, 'assignee' => null]))
+            ->assertOk();
+
+        expect($ticket->fresh()->title)->toBe('Renamed');
+    });
+});
+
+describe('update and destroy', function () {
+    it('lets the author update and then delete their own ticket', function () {
+        $ticket = Ticket::factory()->recycle($this->author)->create(['status' => 'open']);
+        $token = jwtFor($this->author);
+
+        $this->withToken($token)
+            ->patchJson("/api/v1/users/{$this->author->id}/tickets/{$ticket->id}", ['data' => ['attributes' => ['status' => 'pending']]])
+            ->assertOk()
+            ->assertJsonPath('data.attributes.status', 'pending');
+
+        $this->withToken($token)
+            ->deleteJson("/api/v1/users/{$this->author->id}/tickets/{$ticket->id}")
+            ->assertOk();
+
+        $this->assertModelMissing($ticket);
+    });
+
+    it('returns 404 when the ticket does not belong to the user in the URL', function () {
+        $foreign = Ticket::factory()->create();
+        $token = jwtFor($this->author);
+
+        $this->withToken($token)
+            ->deleteJson("/api/v1/users/{$this->author->id}/tickets/{$foreign->id}")
+            ->assertNotFound();
+        $this->withToken($token)
+            ->patchJson("/api/v1/users/{$this->author->id}/tickets/{$foreign->id}", ['data' => ['attributes' => ['status' => 'closed']]])
+            ->assertNotFound();
+        $this->withToken($token)
+            ->putJson("/api/v1/users/{$this->author->id}/tickets/{$foreign->id}", ticketPayload([], ['author' => $this->author->id, 'assignee' => null]))
+            ->assertNotFound();
+
+        $this->assertModelExists($foreign);
+    });
+
+    it('returns 403 when a user deletes another user ticket through that user URL', function () {
+        $ticket = Ticket::factory()->recycle($this->author)->create();
+
+        $this->withToken(jwtFor(User::factory()->create()))
+            ->deleteJson("/api/v1/users/{$this->author->id}/tickets/{$ticket->id}")
+            ->assertForbidden();
+
+        $this->assertModelExists($ticket);
+    });
+});
