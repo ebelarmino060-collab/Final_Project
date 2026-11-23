@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\AuthorsController;
 use App\Http\Controllers\Api\V1\TicketController;
+use App\Http\Controllers\Api\V1\UserController;
 use App\Http\Controllers\Api\V1\UserTicketsController;
 use Illuminate\Support\Facades\Route;
 
@@ -29,6 +30,11 @@ Route::middleware('auth:api')->group(function () {
 
     // Authors are read only: list and show
     Route::apiResource('authors', AuthorsController::class)->only(['index', 'show']);
+
+    // Users (management): list, create, show and delete use the resource routes
+    Route::apiResource('users', UserController::class)->except(['update']);
+    Route::put('users/{user}', [UserController::class, 'replace']);
+    Route::patch('users/{user}', [UserController::class, 'update']);
 
     // Tickets raised by one user: /users/{user}/tickets
     Route::apiResource('users.tickets', UserTicketsController::class)

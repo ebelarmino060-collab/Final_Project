@@ -29,7 +29,7 @@ Statuses: Not Started · In Progress · Completed · Blocked
 | 20 | Controlling Access with Token Abilities | Completed |
 | 21 | Applying Granular Permissions | Completed |
 | 22 | Implementing the Users Products Controller | Completed |
-| 23 | Managing Users | Not Started |
+| 23 | Managing Users | Completed |
 | 24 | The Principle of Least Privilege | Not Started |
 | 25 | Handling Errors | Not Started |
 | 26 | API Documentation with Scribe | Not Started |
@@ -212,4 +212,13 @@ Statuses: Not Started · In Progress · Completed · Blocked
 - **Files:** `app/Http/Controllers/Api/V1/UserTicketsController.php`, `routes/api_v1.php`, `tests/Feature/Api/V1/UserTicketsControllerTest.php`.
 - **Testing:** 115 tests passing (create through own URL 201; under another user 422 "must be {id}"; manager under any user 201; regular PUT 403 and manager PUT 200; author PATCH + DELETE; foreign ticket under a user URL returns 404 for DELETE/PATCH/PUT; another user's DELETE 403).
 - **Commit:** `Implementing the Users Products Controller`
+- **Status:** Completed
+
+## Lesson 23: Managing Users
+- **Concepts:** user management kept apart from the read-only authors view; a `UserPolicy` based on the `user:*` abilities; Base/Store/Replace/Update request family; password hashing in `mappedAttributes()`; exposing `isManager`.
+- **Ticket implementation:** `UserPolicy` (`store`, `update`, `replace`, `delete`), registered in `AppServiceProvider`. `BaseUserRequest` hashes any mapped password; `StoreUserRequest` (unique email), `ReplaceUserRequest` (unique email ignoring the user being replaced), `UpdateUserRequest` (`sometimes`). `UserController` (index with `AuthorFilter`, store, show with `?include=tickets`, replace, update, destroy). `UserResource` shows `isManager`. Routes: `apiResource('users')->except(['update'])` plus manual PUT / PATCH.
+- **Note:** deleting a user also deletes the tickets they raised (cascade) and unassigns the tickets assigned to them (null on delete), as set in the Lesson 6 migration.
+- **Files:** `app/Policies/V1/UserPolicy.php` (new), `app/Http/Requests/Api/V1/BaseUserRequest.php`, `StoreUserRequest.php`, `ReplaceUserRequest.php`, `UpdateUserRequest.php` (new), `app/Http/Controllers/Api/V1/UserController.php` (new), `app/Http/Resources/V1/UserResource.php`, `app/Providers/AppServiceProvider.php`, `routes/api_v1.php`, `tests/Feature/Api/V1/UserControllerTest.php` (new), `tests/Feature/Policies/V1/UserPolicyTest.php` (new).
+- **Testing:** 134 tests passing (UserPolicy matrix; list with filters; show with isManager and included tickets; manager create with a hashed password; regular create 403; 422 for a taken email or short password; replace keeping the same email; replace 422; promotion by a manager 200 and self-promotion 403; delete by a manager 200 and by a regular user 403).
+- **Commit:** `Managing Users`
 - **Status:** Completed
