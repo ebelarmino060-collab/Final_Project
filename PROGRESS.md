@@ -13,7 +13,7 @@ Statuses: Not Started · In Progress · Completed · Blocked
 | 4 | Git Commit to Main | Completed |
 | 5 | API Response | Completed |
 | 6 | Designing the URL | Completed |
-| 7 | How to Version Your API | Not Started |
+| 7 | How to Version Your API | Completed |
 | 8 | Authentication with JWT | Not Started |
 | 9 | Designing Response Payloads | Not Started |
 | 10 | Conditionally Omitting and Including Data | Not Started |
@@ -80,4 +80,12 @@ Statuses: Not Started · In Progress · Completed · Blocked
 - **Files:** `app/Models/Ticket.php`, `app/Enums/TicketStatus.php`, `app/Enums/TicketPriority.php`, `database/migrations/*_create_tickets_table.php`, `database/factories/TicketFactory.php`, `database/seeders/DatabaseSeeder.php`, `routes/api.php`, `tests/Pest.php` (RefreshDatabase enabled), `tests/Feature/Models/TicketTest.php`, `tests/Feature/Api/TicketRoutesTest.php`.
 - **Testing:** `migrate` and `db:seed` ran (100 tickets, 10 users); 9 tests passing (ticket-number generation, enum casts, `GET /api/tickets`).
 - **Commit:** `URL Designing`
+- **Status:** Completed
+
+## Lesson 7: How to Version Your API
+- **Concepts:** the API as a data contract; URL versioning (`/api/v1`) with one route file per version registered in the `then:` callback.
+- **Ticket implementation:** `Api/V1/TicketController@index`, a new `routes/api_v1.php`, and `bootstrap/app.php` loading it under `api/v1`. The temporary `/api/tickets` route was removed. The project's existing JSON-rendering rule (`api/*` **or** `expectsJson()`) was kept rather than narrowed to the lesson's `api/*` only.
+- **Files:** `app/Http/Controllers/Api/V1/TicketController.php` (new), `routes/api_v1.php` (new), `bootstrap/app.php`, `routes/api.php`, `tests/Feature/Api/V1/TicketControllerTest.php` (moved from `tests/Feature/Api/TicketRoutesTest.php`).
+- **Testing:** `GET /api/v1/tickets` returns 200; `/api/tickets` returns 404 (10 tests passing).
+- **Commit:** `API Versioning`
 - **Status:** Completed
