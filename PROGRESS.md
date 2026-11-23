@@ -26,7 +26,7 @@ Statuses: Not Started · In Progress · Completed · Blocked
 | 17 | Replacing Resources with PUT Requests | Completed |
 | 18 | Updating Resources with PATCH Requests | Completed |
 | 19 | Using Policies for User Authorization | Completed |
-| 20 | Controlling Access with Token Abilities | Not Started |
+| 20 | Controlling Access with Token Abilities | Completed |
 | 21 | Applying Granular Permissions | Not Started |
 | 22 | Implementing the Users Products Controller | Not Started |
 | 23 | Managing Users | Not Started |
@@ -188,4 +188,12 @@ Statuses: Not Started · In Progress · Completed · Blocked
 - **Files:** `app/Policies/V1/TicketPolicy.php` (new), `app/Providers/AppServiceProvider.php`, `app/Http/Controllers/Api/V1/APIController.php`, `app/Traits/ApiResponses.php`, `app/Http/Controllers/Api/V1/TicketController.php`, `tests/Feature/Policies/V1/TicketPolicyTest.php` (new), `tests/Feature/Api/V1/TicketControllerTest.php` (update tests now use the caller's own ticket).
 - **Testing:** 87 tests passing (policy allow/deny, PATCH of someone else's ticket returns 403 and leaves it unchanged, owner PATCH returns 200).
 - **Commit:** `Using Policies for User Authorization`
+- **Status:** Completed
+
+## Lesson 20: Controlling Access with Token Abilities
+- **Concepts:** abilities named `resource:action` (`own` = only my records), written into the JWT payload at login and checked with `tokenCan()` (a custom version, because Sanctum's does not read JWT claims). Ability names live in one class.
+- **Ticket implementation:** `Abilities` holds `ticket:create`, `ticket:own:create`, `ticket:update`, `ticket:own:update`, `ticket:replace`, `ticket:delete`, `ticket:own:delete`, plus `user:create/update/replace/delete`. Managers get the broad ticket abilities and every user ability; regular users get only the `own` ticket abilities. An `is_manager` column (migration, fillable, boolean cast), a `manager()` factory state, and a seeded manager (`manager@manager.com` / `password`). `User::getJWTCustomClaims()` returns the abilities and `User::tokenCan()` reads them. The final `TicketPolicy` (`store`, `update`, `replace`, `delete`) is applied in `store`, `replace` and `destroy`.
+- **Files:** `app/Permissions/V1/Abilities.php` (new), `database/migrations/*_add_is_manager_to_users_table.php` (new), `database/factories/UserFactory.php`, `database/seeders/DatabaseSeeder.php`, `app/Models/User.php`, `app/Policies/V1/TicketPolicy.php`, `app/Http/Controllers/Api/V1/TicketController.php`, `tests/Feature/Permissions/V1/AbilitiesTest.php` (new), `tests/Feature/Policies/V1/TicketPolicyTest.php`, `tests/Feature/Api/V1/TicketControllerTest.php`.
+- **Testing:** 102 tests passing (full policy matrix, no token means no abilities, abilities in the login token, manager deletes any ticket, 403 deleting someone else's ticket, regular PUT 403, manager PUT 200). Live check after `migrate:fresh --seed`: the decoded manager and regular tokens show the right abilities, and PUT on another user's ticket returns 403 for a regular user and 200 for the manager.
+- **Commit:** `Controlling Access with Token Abilities`
 - **Status:** Completed

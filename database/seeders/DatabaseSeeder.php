@@ -26,5 +26,11 @@ class DatabaseSeeder extends Seeder
                 'assigned_to' => fake()->boolean(70) ? $users->random()->id : null,
             ])
             ->create();
+
+        // A manager account used to test the manager abilities (password: password)
+        User::factory()->manager()->create([
+            'name' => 'The Manager',
+            'email' => 'manager@manager.com',
+        ]);
     }
 }

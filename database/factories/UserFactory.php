@@ -42,4 +42,14 @@ class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
+
+    /**
+     * A manager: receives every ticket and user ability.
+     */
+    public function manager(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_manager' => true,
+        ]);
+    }
 }

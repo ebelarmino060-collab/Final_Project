@@ -221,8 +221,8 @@ describe('store', function () {
 });
 
 describe('destroy', function () {
-    it('deletes the ticket', function () {
-        $ticket = Ticket::factory()->create();
+    it('deletes a ticket the user raised', function () {
+        $ticket = Ticket::factory()->recycle($this->user)->create();
 
         $this->withToken(jwtFor($this->user))
             ->deleteJson("/api/v1/tickets/{$ticket->id}")
@@ -232,8 +232,29 @@ describe('destroy', function () {
         $this->assertModelMissing($ticket);
     });
 
-    it('returns 404 when the ticket is already gone', function () {
+    it('lets a manager delete any ticket', function () {
         $ticket = Ticket::factory()->create();
+
+        $this->withToken(jwtFor(User::factory()->manager()->create()))
+            ->deleteJson("/api/v1/tickets/{$ticket->id}")
+            ->assertOk();
+
+        $this->assertModelMissing($ticket);
+    });
+
+    it('returns 403 and keeps the ticket when a user deletes a ticket someone else raised', function () {
+        $ticket = Ticket::factory()->create();
+
+        $this->withToken(jwtFor($this->user))
+            ->deleteJson("/api/v1/tickets/{$ticket->id}")
+            ->assertForbidden()
+            ->assertJsonPath('message', 'You are not authorized to delete that resource.');
+
+        $this->assertModelExists($ticket);
+    });
+
+    it('returns 404 when the ticket is already gone', function () {
+        $ticket = Ticket::factory()->recycle($this->user)->create();
         $token = jwtFor($this->user);
 
         $this->withToken($token)->deleteJson("/api/v1/tickets/{$ticket->id}")->assertOk();
@@ -250,11 +271,11 @@ describe('destroy', function () {
 });
 
 describe('replace', function () {
-    it('replaces every field of the ticket', function () {
+    it('lets a manager replace every field of the ticket', function () {
         $ticket = Ticket::factory()->assigned()->create(['ticket_number' => 'TCK-20260101-KEEP01']);
         $newAuthor = User::factory()->create();
 
-        $this->withToken(jwtFor($this->user))
+        $this->withToken(jwtFor(User::factory()->manager()->create()))
             ->putJson("/api/v1/tickets/{$ticket->id}", ticketPayload(
                 ['title' => 'Replaced', 'description' => 'Replaced via PUT.', 'status' => 'resolved', 'priority' => 'low'],
                 ['author' => $newAuthor->id, 'assignee' => null],
@@ -270,6 +291,17 @@ describe('replace', function () {
             ->created_by->toBe($newAuthor->id)
             ->assigned_to->toBeNull()
             ->ticket_number->toBe('TCK-20260101-KEEP01');
+    });
+
+    it('returns 403 when a regular user replaces even their own ticket', function () {
+        $ticket = Ticket::factory()->recycle($this->user)->create(['title' => 'Original']);
+
+        $this->withToken(jwtFor($this->user))
+            ->putJson("/api/v1/tickets/{$ticket->id}", ticketPayload([], ['author' => $this->user->id, 'assignee' => null]))
+            ->assertForbidden()
+            ->assertJsonPath('message', 'You are not authorized to replace that resource.');
+
+        expect($ticket->fresh()->title)->toBe('Original');
     });
 
     it('returns 422 and changes nothing when fields are missing', function () {

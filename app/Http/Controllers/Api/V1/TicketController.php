@@ -44,37 +44,50 @@ class TicketController extends APIController
 
     /**
      * POST /api/v1/tickets
-     * Validates the body with StoreTicketRequest, then creates the ticket.
+     * Validates the body with StoreTicketRequest, then creates the ticket if the policy allows it.
      * Laravel answers 201 Created automatically for a newly created resource.
      */
-    public function store(StoreTicketRequest $request): TicketResource
+    public function store(StoreTicketRequest $request): TicketResource|JsonResponse
     {
-        // mappedAttributes() converts the nested JSON into database columns
-        return new TicketResource(
-            Ticket::create($request->mappedAttributes())
-        );
+        // Ask TicketPolicy::store() (checks the ability stored in the token)
+        if ($this->isAble('store', Ticket::class)) {
+            // mappedAttributes() converts the nested JSON into database columns
+            return new TicketResource(
+                Ticket::create($request->mappedAttributes())
+            );
+        }
+
+        return $this->notAuthorized('You are not authorized to create that resource.');
     }
 
     /**
      * DELETE /api/v1/tickets/{ticket}
-     * Deletes the ticket. A missing ticket never reaches this method: Laravel answers 404.
+     * Deletes the ticket if the policy allows it. A missing ticket returns 404.
      */
     public function destroy(Ticket $ticket): JsonResponse
     {
-        $ticket->delete();
+        if ($this->isAble('delete', $ticket)) {
+            $ticket->delete();
 
-        return $this->ok('Ticket successfully deleted');
+            return $this->ok('Ticket successfully deleted');
+        }
+
+        return $this->notAuthorized('You are not authorized to delete that resource.');
     }
 
     /**
      * PUT /api/v1/tickets/{ticket}
-     * Replaces the whole ticket: every field must be sent (see ReplaceTicketRequest).
+     * Replaces the whole ticket (see ReplaceTicketRequest) if the policy allows it.
      */
-    public function replace(ReplaceTicketRequest $request, Ticket $ticket): TicketResource
+    public function replace(ReplaceTicketRequest $request, Ticket $ticket): TicketResource|JsonResponse
     {
-        $ticket->update($request->mappedAttributes());
+        if ($this->isAble('replace', $ticket)) {
+            $ticket->update($request->mappedAttributes());
 
-        return new TicketResource($ticket);
+            return new TicketResource($ticket);
+        }
+
+        return $this->notAuthorized('You are not authorized to replace that resource.');
     }
 
     /**
