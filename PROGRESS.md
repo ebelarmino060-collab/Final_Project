@@ -33,7 +33,7 @@ Statuses: Not Started · In Progress · Completed · Blocked
 | 24 | The Principle of Least Privilege | Completed |
 | 25 | Handling Errors | Completed |
 | 26 | API Documentation with Scribe | Completed |
-| 27 | Appendix A: Where Each File Is Finished | Not Started |
+| 27 | Appendix A: Where Each File Is Finished | Completed |
 
 ---
 
@@ -249,3 +249,87 @@ Statuses: Not Started · In Progress · Completed · Blocked
 - **Testing:** `php artisan scribe:generate` finishes with no errors or warnings: 24 endpoints in 5 groups. `/docs` (HTML), `/docs.postman` and `/docs.openapi` all return 200. The generated example for `GET /tickets` shows the real resource shape and all 12 query parameters. The database is unchanged after generation. 147 tests still pass.
 - **Commit:** `API Documentation with Scribe`
 - **Status:** Completed
+
+## Lesson 27: Appendix A: Where Each File Is Finished
+- **Concepts:** a reference index of the lesson where each course file reaches its final form. No code and no commit of its own.
+- **Ticket implementation:** each course file was mapped to its Ticket counterpart and checked against `git log` (the last lesson commit that touched it).
+- **Testing:** final verification on a clean database (`migrate:fresh --seed`): 147 tests / 467 assertions passing, `pint` clean, 24 `api/v1` routes registered.
+- **Commit:** none is given by the lesson; this tracker update is committed as `Appendix A: Where Each File Is Finished`.
+- **Status:** Completed
+
+| Course file | Ticket API file | Course: finished in | Here: finished in |
+|---|---|---|---|
+| `.env` | `.env` (not committed) and `.env.example` | 2 | 8 (`JWT_SECRET` added) |
+| `app/Traits/ApiResponses.php` | same | 25 | 25 |
+| `routes/api.php` | same | 7 | 7 |
+| `app/Models/Product.php` | `app/Models/Ticket.php` | 12 | 15 (default status/priority) |
+| `…create_products_table.php` | `…create_tickets_table.php` | 6 | 6 |
+| `database/factories/ProductFactory.php` | `database/factories/TicketFactory.php` | 6 | 6 |
+| `database/seeders/DatabaseSeeder.php` | same | 20 | 20 |
+| `…/V1/ProductController.php` | `…/V1/TicketController.php` | 26 | 26 |
+| `bootstrap/app.php` | same | 25 | 25 |
+| `routes/api_v1.php` | same | 23 | 23 |
+| `config/auth.php` | same | 8 | 8 |
+| `app/Models/User.php` | same | 20 | 20 |
+| `…/Api/RegisterUserRequest.php`, `LoginUserRequest.php` | same | 8 | 26 (`bodyParameters()`) |
+| `…/V1/AuthController.php` | same | 26 | 26 |
+| `…/V1/ProductResource.php` | `…/V1/TicketResource.php` | 11 | 11 |
+| `…/V1/UserResource.php` | same | 23 | 23 |
+| `…/V1/AuthorsController.php` | same | 14 | 26 (Scribe DocBlocks, as 26.3 asks) |
+| `…/V1/APIController.php` | same | 19 | 19 |
+| `…/Filters/V1/QueryFilter.php` | same | 14 | 14 |
+| `…/Filters/V1/ProductFilter.php` | `…/Filters/V1/TicketFilter.php` | 14 | 14 |
+| `…/V1/UserProductsController.php` | `…/V1/UserTicketsController.php` | 22 | 26 (Scribe DocBlocks) |
+| `…/Filters/V1/AuthorFilter.php` | same | 14 | 14 |
+| `…/V1/BaseProductRequest.php` | `…/V1/BaseTicketRequest.php` | 15 | 26 (`bodyParameters()`) |
+| `…/V1/StoreProductRequest.php` | `…/V1/StoreTicketRequest.php` | 26 | 26 |
+| `…/V1/ReplaceProductRequest.php` | `…/V1/ReplaceTicketRequest.php` | 17 | 17 |
+| `…/V1/UpdateProductRequest.php` | `…/V1/UpdateTicketRequest.php` | 26 | 26 |
+| `app/Policies/V1/ProductPolicy.php` | `app/Policies/V1/TicketPolicy.php` | 20 | 20 |
+| `app/Providers/AppServiceProvider.php` | same | 23 | 23 |
+| `app/Permissions/V1/Abilities.php` | same | 20 | 20 |
+| `…add_is_manager_to_users_table.php` | same | 20 | 20 |
+| `app/Policies/V1/UserPolicy.php` | same | 23 | 23 |
+| `…/V1/BaseUserRequest.php` | same | 23 | 26 (`bodyParameters()`) |
+| `…/V1/StoreUserRequest.php`, `ReplaceUserRequest.php`, `UpdateUserRequest.php` | same | 23 | 23 |
+| `…/V1/UserController.php` | same | 23 | 26 (Scribe DocBlocks) |
+| `app/Exceptions/Handler.php` | same | 25 | 25 |
+| (Ticket only) | `app/Enums/TicketStatus.php`, `app/Enums/TicketPriority.php` | – | 6 |
+| (Ticket only) | `database/factories/UserFactory.php` (`manager()` state) | – | 20 |
+
+---
+
+## Endpoints (all under `/api/v1`)
+
+Every route except register and login needs `Authorization: Bearer {access_token}`. Send `Accept: application/json`.
+
+| Method | URL | Who | Purpose |
+|---|---|---|---|
+| POST | `/auth/register` | public | create an account, returns a token |
+| POST | `/auth/login` | public | returns a token carrying the user's abilities |
+| GET | `/auth/me` | any user | the token's owner |
+| POST | `/auth/refresh` | any user | new token; the old one is blacklisted |
+| POST | `/auth/logout` | any user | blacklist the token |
+| GET | `/tickets` | any user | paginated list with filters, search, sort, include |
+| GET | `/tickets/{ticket}` | any user | one ticket (`?include=author,assignee`) |
+| POST | `/tickets` | own or manager | create (regular users: author = self, no assignee) |
+| PATCH | `/tickets/{ticket}` | owner or manager | change status / priority / title / description; managers also assign and change the author |
+| PUT | `/tickets/{ticket}` | manager | replace every field |
+| DELETE | `/tickets/{ticket}` | owner or manager | delete |
+| GET | `/users/{user}/tickets` | any user | tickets a user raised (same filters) |
+| POST / PATCH / PUT / DELETE | `/users/{user}/tickets[/{ticket}]` | same rules as `/tickets` | scoped: another user's ticket returns 404 |
+| GET | `/authors`, `/authors/{author}` | any user | users who raised tickets (`?include=tickets`) |
+| GET | `/users`, `/users/{user}` | any user | all users |
+| POST / PATCH / PUT / DELETE | `/users[/{user}]` | manager | user management |
+
+**Ticket query parameters:** `status`, `priority` (comma lists); `search` (ticket number or title); `title`, `ticketNumber` (`*` wildcard); `createdBy`, `assignedTo` (user ids); `createdAt`, `updatedAt` (a date or `from,to`); `sort` (`ticketNumber,title,status,priority,createdAt,updatedAt`, with `-` for descending); `include` (`author,assignee`); `page`.
+
+Interactive documentation: `/docs` · Postman: `/docs.postman` · OpenAPI: `/docs.openapi`.
+
+## How to run
+
+1. `composer install` and `npm install` (PHP 8.3 with the `pdo_mysql` and `sodium` extensions enabled).
+2. `cp .env.example .env`, then `php artisan key:generate` and `php artisan jwt:secret`.
+3. Create the MySQL databases `ticket` (app) and `ticket_testing` (tests), then run `php artisan migrate --seed`. This creates 10 users and 100 tickets (all with password `password`) and the manager `manager@manager.com` / `password`.
+4. `php artisan serve`, then log in with `POST /api/v1/auth/login` and use the `access_token` as a Bearer token.
+5. Tests: `php artisan test --compact`. Docs: `php artisan scribe:generate` after changing routes, requests or DocBlocks.
