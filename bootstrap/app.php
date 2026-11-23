@@ -1,5 +1,7 @@
 <?php
 
+use App\Exceptions\Handler;
+use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -34,4 +36,12 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
-    })->create();
+    })
+    ->booting(function () {
+        // Use the custom handler: every API exception gets the standard JSON error format
+        app()->singleton(
+            ExceptionHandler::class,
+            Handler::class
+        );
+    })
+    ->create();

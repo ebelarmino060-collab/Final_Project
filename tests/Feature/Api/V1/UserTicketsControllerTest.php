@@ -62,7 +62,7 @@ describe('store', function () {
         $this->withToken(jwtFor($this->author))
             ->postJson("/api/v1/users/{$other->id}/tickets", ticketPayload())
             ->assertUnprocessable()
-            ->assertJsonValidationErrors(['author' => "The author field must be {$this->author->id}."]);
+            ->assertApiValidationErrors(['author' => "The author field must be {$this->author->id}."]);
 
         expect(Ticket::count())->toBe(0);
     });

@@ -64,7 +64,7 @@ describe('store', function () {
         $this->withToken(jwtFor($this->regular))
             ->postJson('/api/v1/users', userPayload(['email' => 'sneaky@example.com', 'isManager' => true]))
             ->assertForbidden()
-            ->assertJsonPath('message', 'You are not authorized to create that resource.');
+            ->assertJsonPath('errors.0.message', 'You are not authorized to create that resource.');
 
         $this->assertDatabaseMissing('users', ['email' => 'sneaky@example.com']);
     });
@@ -73,7 +73,7 @@ describe('store', function () {
         $this->withToken(jwtFor($this->manager))
             ->postJson('/api/v1/users', userPayload(['email' => $this->regular->email, 'password' => 'short']))
             ->assertUnprocessable()
-            ->assertJsonValidationErrors([
+            ->assertApiValidationErrors([
                 'data.attributes.email' => 'The data.attributes.email has already been taken.',
                 'data.attributes.password' => 'The data.attributes.password field must be at least 8 characters.',
             ]);
@@ -92,7 +92,7 @@ describe('replace and update', function () {
         $this->withToken(jwtFor($this->manager))
             ->putJson("/api/v1/users/{$this->regular->id}", ['data' => ['attributes' => ['name' => 'Only name']]])
             ->assertUnprocessable()
-            ->assertJsonValidationErrors(['data.attributes.email', 'data.attributes.isManager', 'data.attributes.password']);
+            ->assertApiValidationErrors(['data.attributes.email', 'data.attributes.isManager', 'data.attributes.password']);
     });
 
     it('lets a manager promote a user with a partial update', function () {

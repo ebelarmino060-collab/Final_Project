@@ -60,3 +60,45 @@ test('error returns the message and status without a data key', function () {
             'status' => 401,
         ]);
 });
+
+test('error with a list of errors uses the status of the first error', function () {
+    $responder = new class
+    {
+        use ApiResponses;
+
+        /**
+         * @param  list<array<string, mixed>>  $errors
+         */
+        public function callErrors(array $errors): JsonResponse
+        {
+            return $this->error($errors);
+        }
+
+        public function callNotAuthorized(string $message): JsonResponse
+        {
+            return $this->notAuthorized($message);
+        }
+    };
+
+    $response = $responder->callErrors([['status' => 422, 'message' => 'Bad', 'source' => 'x']]);
+    $forbidden = $responder->callNotAuthorized('No');
+
+    expect($response->getStatusCode())->toBe(422)
+        ->and($response->getData(true))->toBe(['errors' => [['status' => 422, 'message' => 'Bad', 'source' => 'x']]])
+        ->and($forbidden->getStatusCode())->toBe(403)
+        ->and($forbidden->getData(true))->toBe(['errors' => [['status' => 403, 'message' => 'No', 'source' => '']]]);
+});
+
+test('error falls back to 500 for an invalid status code', function () {
+    $responder = new class
+    {
+        use ApiResponses;
+
+        public function callErrors(): JsonResponse
+        {
+            return $this->error([['status' => 999, 'message' => 'Odd', 'source' => '']]);
+        }
+    };
+
+    expect($responder->callErrors()->getStatusCode())->toBe(500);
+});

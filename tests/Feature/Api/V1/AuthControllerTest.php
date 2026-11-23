@@ -31,7 +31,7 @@ describe('register', function () {
             'password' => 'password',
             'password_confirmation' => 'different',
         ])->assertUnprocessable()
-            ->assertJsonValidationErrors([
+            ->assertApiValidationErrors([
                 'email' => 'The email has already been taken.',
                 'password' => 'The password field confirmation does not match.',
             ]);
@@ -63,7 +63,7 @@ describe('login', function () {
     it('returns 422 when the email is missing', function () {
         $this->postJson('/api/v1/auth/login', ['password' => 'password'])
             ->assertUnprocessable()
-            ->assertJsonValidationErrors(['email' => 'The email field is required.']);
+            ->assertApiValidationErrors(['email' => 'The email field is required.']);
     });
 });
 

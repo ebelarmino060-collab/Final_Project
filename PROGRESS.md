@@ -31,7 +31,7 @@ Statuses: Not Started · In Progress · Completed · Blocked
 | 22 | Implementing the Users Products Controller | Completed |
 | 23 | Managing Users | Completed |
 | 24 | The Principle of Least Privilege | Completed |
-| 25 | Handling Errors | Not Started |
+| 25 | Handling Errors | Completed |
 | 26 | API Documentation with Scribe | Not Started |
 | 27 | Appendix A: Where Each File Is Finished | Not Started |
 
@@ -230,4 +230,13 @@ Statuses: Not Started · In Progress · Completed · Blocked
 - **Files:** `app/Http/Requests/Api/V1/StoreTicketRequest.php`, `app/Http/Requests/Api/V1/UpdateTicketRequest.php`, `tests/Feature/Api/V1/TicketControllerTest.php`.
 - **Testing:** 136 tests passing. New tests use a token with **no** abilities: changing the author returns 422 prohibited, and creating for someone else returns 422. Both tests were confirmed to fail against the Lesson 21 (allow-by-default) rules.
 - **Commit:** `The Principle of Least Privilege`
+- **Status:** Completed
+
+## Lesson 25: Handling Errors
+- **Concepts:** one error format for every failure, `{"errors":[{"status","message","source"}]}`, built in a single custom exception handler with a map from exception class to builder method; file and line are revealed only when `APP_DEBUG` is true.
+- **Ticket implementation:** final `ApiResponses::error()` (accepts a message or an error list, guards invalid statuses) and `notAuthorized()` in the standard format. `App\Exceptions\Handler` covers validation 422 (one object per message), model not found 404 (source = model class), route not found 404 (source = `Route`, or the model when binding failed), unauthenticated 401, and anything else (the exception's own status, or 500). It is registered with `->booting()` in `bootstrap/app.php`.
+- **Adjustments:** the handler only reformats API/JSON requests. Web routes keep Laravel's default HTML error pages, preserving the existing web behaviour. With debug off, HTTP errors show their standard status text (for example "Method Not Allowed") instead of "Server error". The tests use a new `assertApiValidationErrors()` macro for the new validation shape.
+- **Files:** `app/Traits/ApiResponses.php`, `app/Exceptions/Handler.php` (new), `bootstrap/app.php`, `tests/Pest.php` (macro), `tests/Feature/Exceptions/HandlerTest.php` (new), `tests/Feature/Traits/ApiResponsesTest.php`, and the API feature tests (assertions moved to the new format).
+- **Testing:** 147 tests passing (401, 404 model, 404 route, 422 list, 405, a 500 that hides its secret message when debug is off, debug details when on, status text for HTTP errors, web 404 stays HTML). Live check on `php artisan serve` confirmed the 401, 404 and 405 JSON and a text/html web 404.
+- **Commit:** `Handling Errors`
 - **Status:** Completed

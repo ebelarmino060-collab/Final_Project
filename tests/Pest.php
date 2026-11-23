@@ -2,7 +2,9 @@
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Testing\TestResponse;
 use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
+use PHPUnit\Framework\Assert;
 use Tests\TestCase;
 
 /*
@@ -89,3 +91,28 @@ function ticketPayload(array $attributes = [], array $relationships = []): array
 
     return ['data' => $data];
 }
+
+/*
+| The API returns validation errors in its own format (Lesson 25):
+| {"errors": [{"status": 422, "message": "...", "source": "data.attributes.title"}]}
+| assertApiValidationErrors() accepts the same arguments as assertJsonValidationErrors():
+| a list of fields, or field => expected message.
+*/
+TestResponse::macro('assertApiValidationErrors', function (array $expected): TestResponse {
+    /** @var TestResponse $this */
+    $errors = collect($this->json('errors'));
+
+    foreach ($expected as $key => $message) {
+        $field = is_int($key) ? $message : $key;
+        $fieldErrors = $errors->where('source', $field);
+
+        Assert::assertNotEmpty($fieldErrors, "No validation error for [{$field}]. Errors: ".$errors->toJson());
+        Assert::assertSame([422], $fieldErrors->pluck('status')->unique()->values()->all());
+
+        if (! is_int($key)) {
+            Assert::assertContains($message, $fieldErrors->pluck('message')->all());
+        }
+    }
+
+    return $this;
+});

@@ -186,7 +186,7 @@ describe('store', function () {
         $this->withToken(jwtFor($this->user))
             ->postJson('/api/v1/tickets', ['data' => ['attributes' => ['status' => 'open']]])
             ->assertUnprocessable()
-            ->assertJsonValidationErrors([
+            ->assertApiValidationErrors([
                 'data.attributes.title' => 'The data.attributes.title field is required.',
                 'data.attributes.description' => 'The data.attributes.description field is required.',
                 'data.relationships.author.data.id' => 'The data.relationships.author.data.id field is required.',
@@ -199,7 +199,7 @@ describe('store', function () {
         $this->withToken(jwtFor($this->user))
             ->postJson('/api/v1/tickets', ticketPayload(['status' => 'done', 'priority' => 'asap'], ['author' => $this->user->id]))
             ->assertUnprocessable()
-            ->assertJsonValidationErrors([
+            ->assertApiValidationErrors([
                 'data.attributes.status' => 'The data.attributes.status value is invalid. Please use open, in_progress, pending, resolved, closed.',
                 'data.attributes.priority' => 'The data.attributes.priority value is invalid. Please use low, medium, high, urgent.',
             ]);
@@ -218,7 +218,7 @@ describe('store', function () {
         $this->withToken(jwtFor($this->user))
             ->postJson('/api/v1/tickets', ticketPayload([], ['author' => $other->id]))
             ->assertUnprocessable()
-            ->assertJsonValidationErrors([
+            ->assertApiValidationErrors([
                 'data.relationships.author.data.id' => "The data.relationships.author.data.id field must be {$this->user->id}.",
             ]);
 
@@ -229,7 +229,7 @@ describe('store', function () {
         $this->withToken(jwtFor($this->user))
             ->postJson('/api/v1/tickets', ticketPayload([], ['author' => $this->user->id, 'assignee' => User::factory()->create()->id]))
             ->assertUnprocessable()
-            ->assertJsonValidationErrors([
+            ->assertApiValidationErrors([
                 'data.relationships.assignee.data.id' => 'The data.relationships.assignee.data.id field is prohibited.',
             ]);
     });
@@ -238,7 +238,7 @@ describe('store', function () {
         $this->withToken(jwtFor(User::factory()->manager()->create()))
             ->postJson('/api/v1/tickets', ticketPayload([], ['author' => 99999, 'assignee' => 99998]))
             ->assertUnprocessable()
-            ->assertJsonValidationErrors([
+            ->assertApiValidationErrors([
                 'data.relationships.author.data.id' => 'The selected data.relationships.author.data.id is invalid.',
                 'data.relationships.assignee.data.id' => 'The selected data.relationships.assignee.data.id is invalid.',
             ]);
@@ -277,7 +277,7 @@ describe('destroy', function () {
         $this->withToken(jwtFor($this->user))
             ->deleteJson("/api/v1/tickets/{$ticket->id}")
             ->assertForbidden()
-            ->assertJsonPath('message', 'You are not authorized to delete that resource.');
+            ->assertJsonPath('errors.0.message', 'You are not authorized to delete that resource.');
 
         $this->assertModelExists($ticket);
     });
@@ -328,7 +328,7 @@ describe('replace', function () {
         $this->withToken(jwtFor($this->user))
             ->putJson("/api/v1/tickets/{$ticket->id}", ticketPayload([], ['author' => $this->user->id, 'assignee' => null]))
             ->assertForbidden()
-            ->assertJsonPath('message', 'You are not authorized to replace that resource.');
+            ->assertJsonPath('errors.0.message', 'You are not authorized to replace that resource.');
 
         expect($ticket->fresh()->title)->toBe('Original');
     });
@@ -339,7 +339,7 @@ describe('replace', function () {
         $this->withToken(jwtFor($this->user))
             ->putJson("/api/v1/tickets/{$ticket->id}", ['data' => ['attributes' => ['status' => 'closed']]])
             ->assertUnprocessable()
-            ->assertJsonValidationErrors([
+            ->assertApiValidationErrors([
                 'data.attributes.title' => 'The data.attributes.title field is required.',
                 'data.attributes.description' => 'The data.attributes.description field is required.',
                 'data.attributes.priority' => 'The data.attributes.priority field is required.',
@@ -406,7 +406,7 @@ describe('update', function () {
         $this->withToken(jwtFor($this->user))
             ->patchJson("/api/v1/tickets/{$ticket->id}", ['data' => ['attributes' => ['status' => 'done']]])
             ->assertUnprocessable()
-            ->assertJsonValidationErrors([
+            ->assertApiValidationErrors([
                 'data.attributes.status' => 'The data.attributes.status value is invalid. Please use open, in_progress, pending, resolved, closed.',
             ]);
 
@@ -419,7 +419,7 @@ describe('update', function () {
         $this->withToken(jwtFor(User::factory()->manager()->create()))
             ->patchJson("/api/v1/tickets/{$ticket->id}", ['data' => ['relationships' => ['assignee' => ['data' => ['id' => 99999]]]]])
             ->assertUnprocessable()
-            ->assertJsonValidationErrors([
+            ->assertApiValidationErrors([
                 'data.relationships.assignee.data.id' => 'The selected data.relationships.assignee.data.id is invalid.',
             ]);
     });
@@ -434,7 +434,7 @@ describe('update', function () {
                 'assignee' => ['data' => ['id' => $other->id]],
             ]]])
             ->assertUnprocessable()
-            ->assertJsonValidationErrors([
+            ->assertApiValidationErrors([
                 'data.relationships.author.data.id' => 'The data.relationships.author.data.id field is prohibited.',
                 'data.relationships.assignee.data.id' => 'The data.relationships.assignee.data.id field is prohibited.',
             ]);
@@ -461,7 +461,7 @@ it('returns 403 and changes nothing when a user updates a ticket someone else ra
     $this->withToken(jwtFor($this->user))
         ->patchJson("/api/v1/tickets/{$ticket->id}", ['data' => ['attributes' => ['title' => 'Hacked name']]])
         ->assertForbidden()
-        ->assertExactJson(['message' => 'You are not authorized to update that resource.', 'status' => 403]);
+        ->assertExactJson(['errors' => [['status' => 403, 'message' => 'You are not authorized to update that resource.', 'source' => '']]]);
 
     expect($ticket->fresh()->title)->toBe('Original');
 });
@@ -475,7 +475,7 @@ describe('least privilege', function () {
         $this->withToken($tokenWithoutAbilities)
             ->patchJson("/api/v1/tickets/{$ticket->id}", ['data' => ['relationships' => ['author' => ['data' => ['id' => User::factory()->create()->id]]]]])
             ->assertUnprocessable()
-            ->assertJsonValidationErrors([
+            ->assertApiValidationErrors([
                 'data.relationships.author.data.id' => 'The data.relationships.author.data.id field is prohibited.',
             ]);
 
@@ -489,7 +489,7 @@ describe('least privilege', function () {
         $this->withToken($tokenWithoutAbilities)
             ->postJson('/api/v1/tickets', ticketPayload([], ['author' => User::factory()->create()->id]))
             ->assertUnprocessable()
-            ->assertJsonValidationErrors(['data.relationships.author.data.id' => "The data.relationships.author.data.id field must be {$this->user->id}."]);
+            ->assertApiValidationErrors(['data.relationships.author.data.id' => "The data.relationships.author.data.id field must be {$this->user->id}."]);
 
         $this->withToken($tokenWithoutAbilities)
             ->postJson('/api/v1/tickets', ticketPayload([], ['author' => $this->user->id]))
