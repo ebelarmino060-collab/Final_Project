@@ -24,6 +24,16 @@ class Ticket extends Model
     use HasFactory;
 
     /**
+     * Default values for a new ticket (they match the column defaults in the migration).
+     *
+     * @var array<string, string>
+     */
+    protected $attributes = [
+        'status' => 'open',
+        'priority' => 'medium',
+    ];
+
+    /**
      * Give every new ticket a ticket number unless one was already set.
      */
     protected static function booted(): void

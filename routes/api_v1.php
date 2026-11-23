@@ -20,8 +20,8 @@ Route::middleware('auth:api')->group(function () {
         Route::post('refresh', [AuthController::class, 'refresh']);
     });
 
-    // GET /tickets (list) and GET /tickets/{ticket} (one ticket)
-    Route::apiResource('tickets', TicketController::class)->only(['index', 'show']);
+    // GET /tickets (list), GET /tickets/{ticket} (one ticket) and POST /tickets (create)
+    Route::apiResource('tickets', TicketController::class)->only(['index', 'show', 'store']);
 
     // Authors are read only: list and show
     Route::apiResource('authors', AuthorsController::class)->only(['index', 'show']);

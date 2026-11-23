@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Filters\V1\TicketFilter;
+use App\Http\Requests\Api\V1\StoreTicketRequest;
 use App\Http\Resources\V1\TicketResource;
 use App\Models\Ticket;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -36,6 +37,19 @@ class TicketController extends APIController
     public function show(Ticket $ticket): TicketResource
     {
         return new TicketResource($ticket->load($this->requestedIncludes()));
+    }
+
+    /**
+     * POST /api/v1/tickets
+     * Validates the body with StoreTicketRequest, then creates the ticket.
+     * Laravel answers 201 Created automatically for a newly created resource.
+     */
+    public function store(StoreTicketRequest $request): TicketResource
+    {
+        // mappedAttributes() converts the nested JSON into database columns
+        return new TicketResource(
+            Ticket::create($request->mappedAttributes())
+        );
     }
 
     /**

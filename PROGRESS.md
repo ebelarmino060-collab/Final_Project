@@ -21,7 +21,7 @@ Statuses: Not Started · In Progress · Completed · Blocked
 | 12 | Writing Filters | Completed |
 | 13 | Using (and Filtering) Nested Resources | Completed |
 | 14 | Sorting Data | Completed |
-| 15 | Creating Resources with POST Requests | Not Started |
+| 15 | Creating Resources with POST Requests | Completed |
 | 16 | Deleting Resources with DELETE Requests | Not Started |
 | 17 | Replacing Resources with PUT Requests | Not Started |
 | 18 | Updating Resources with PATCH Requests | Not Started |
@@ -147,4 +147,13 @@ Statuses: Not Started · In Progress · Completed · Blocked
 - **Files:** `app/Http/Filters/V1/QueryFilter.php`, `app/Http/Filters/V1/TicketFilter.php`, `app/Http/Filters/V1/AuthorFilter.php` (new), `app/Models/User.php`, `app/Http/Controllers/Api/V1/AuthorsController.php`, `tests/Feature/Http/Filters/V1/TicketFilterTest.php`, `tests/Feature/Http/Filters/V1/AuthorFilterTest.php` (new).
 - **Testing:** 66 tests passing (asc/desc, priority and status order, multi-column, whitelist, protected helpers not callable, author name/email/id filters, author sort, include).
 - **Commit:** `Sorting Data`
+- **Status:** Completed
+
+## Lesson 15: Creating Resources with POST Requests
+- **Concepts:** CRUD ↔ HTTP methods, never trusting client input (Form Request validation returns 422 automatically), mass-assignment protection, and a base request that maps the nested JSON:API body to columns.
+- **Ticket implementation:** `APIController` now uses `ApiResponses`. `BaseTicketRequest::mappedAttributes()` maps `data.attributes.{title,description,status,priority}` and `data.relationships.{author,assignee}.data.id` to `title`, `description`, `status`, `priority`, `created_by` and `assigned_to`, with custom enum messages. `StoreTicketRequest` handles `tickets.store` (author id in the body) and `users.tickets.store` (author id merged from the URL in `prepareForValidation()`). `TicketController@store` returns 201.
+- **Adjustments:** status and priority are optional on create and default to `open` / `medium` (model `$attributes`, matching the column defaults). `ticket_number` is never client-settable. Validation uses `Rule::enum()` instead of the course's `in:A,C,H,X`.
+- **Files:** `app/Http/Requests/Api/V1/BaseTicketRequest.php` (new), `app/Http/Requests/Api/V1/StoreTicketRequest.php` (new), `app/Http/Controllers/Api/V1/APIController.php`, `app/Http/Controllers/Api/V1/TicketController.php`, `app/Models/Ticket.php`, `routes/api_v1.php`, `tests/Pest.php` (`ticketPayload()` helper), `tests/Feature/Api/V1/TicketControllerTest.php`.
+- **Testing:** 73 tests passing (201 + persisted state, defaults, client ticket number ignored, 422 for missing fields, 422 with the custom enum messages, 422 for an unknown author/assignee, 401).
+- **Commit:** `Creating Resources with Post Request`
 - **Status:** Completed

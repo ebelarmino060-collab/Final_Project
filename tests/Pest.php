@@ -61,3 +61,31 @@ function jwtFor(User $user): string
 
     return JWTAuth::fromUser($user);
 }
+
+/**
+ * Build a JSON:API ticket request body. Pass null as a value to leave that key out.
+ *
+ * @param  array<string, mixed>  $attributes
+ * @param  array<string, int|null>  $relationships  e.g. ['author' => 5, 'assignee' => 6]
+ * @return array{data: array<string, mixed>}
+ */
+function ticketPayload(array $attributes = [], array $relationships = []): array
+{
+    $data = [
+        'type' => 'ticket',
+        'attributes' => array_merge([
+            'title' => 'Printer offline',
+            'description' => 'The second floor printer does not respond.',
+            'status' => 'open',
+            'priority' => 'high',
+        ], $attributes),
+    ];
+
+    $data['attributes'] = array_filter($data['attributes'], fn (mixed $value): bool => $value !== null);
+
+    foreach ($relationships as $name => $id) {
+        $data['relationships'][$name] = ['data' => ['id' => $id]];
+    }
+
+    return ['data' => $data];
+}

@@ -142,3 +142,80 @@ describe('include', function () {
         expect($userQueries)->toHaveCount(1);
     });
 });
+
+describe('store', function () {
+    it('creates a ticket and returns 201 with a generated ticket number', function () {
+        $assignee = User::factory()->create();
+
+        $response = $this->withToken(jwtFor($this->user))
+            ->postJson('/api/v1/tickets', ticketPayload(
+                ['title' => 'VPN down', 'priority' => 'urgent'],
+                ['author' => $this->user->id, 'assignee' => $assignee->id],
+            ))
+            ->assertCreated()
+            ->assertJsonPath('data.attributes.title', 'VPN down')
+            ->assertJsonPath('data.attributes.priority', 'urgent')
+            ->assertJsonPath('data.relationships.author.data.id', $this->user->id)
+            ->assertJsonPath('data.relationships.assignee.data.id', $assignee->id);
+
+        $ticket = Ticket::findOrFail($response->json('data.id'));
+        expect($ticket)
+            ->title->toBe('VPN down')
+            ->created_by->toBe($this->user->id)
+            ->assigned_to->toBe($assignee->id)
+            ->ticket_number->toMatch('/^TCK-\d{8}-[A-Z0-9]{6}$/');
+    });
+
+    it('defaults a new ticket to open with medium priority', function () {
+        $this->withToken(jwtFor($this->user))
+            ->postJson('/api/v1/tickets', ticketPayload(['status' => null, 'priority' => null], ['author' => $this->user->id]))
+            ->assertCreated()
+            ->assertJsonPath('data.attributes.status', 'open')
+            ->assertJsonPath('data.attributes.priority', 'medium');
+    });
+
+    it('ignores a ticket number sent by the client', function () {
+        $this->withToken(jwtFor($this->user))
+            ->postJson('/api/v1/tickets', ticketPayload(['ticketNumber' => 'TCK-HACKED'], ['author' => $this->user->id]))
+            ->assertCreated();
+
+        expect(Ticket::sole()->ticket_number)->not->toBe('TCK-HACKED');
+    });
+
+    it('returns 422 when required fields are missing', function () {
+        $this->withToken(jwtFor($this->user))
+            ->postJson('/api/v1/tickets', ['data' => ['attributes' => ['status' => 'open']]])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors([
+                'data.attributes.title' => 'The data.attributes.title field is required.',
+                'data.attributes.description' => 'The data.attributes.description field is required.',
+                'data.relationships.author.data.id' => 'The data.relationships.author.data.id field is required.',
+            ]);
+
+        expect(Ticket::count())->toBe(0);
+    });
+
+    it('returns 422 with the custom message for an invalid status or priority', function () {
+        $this->withToken(jwtFor($this->user))
+            ->postJson('/api/v1/tickets', ticketPayload(['status' => 'done', 'priority' => 'asap'], ['author' => $this->user->id]))
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors([
+                'data.attributes.status' => 'The data.attributes.status value is invalid. Please use open, in_progress, pending, resolved, closed.',
+                'data.attributes.priority' => 'The data.attributes.priority value is invalid. Please use low, medium, high, urgent.',
+            ]);
+    });
+
+    it('returns 422 for an author or assignee that does not exist', function () {
+        $this->withToken(jwtFor($this->user))
+            ->postJson('/api/v1/tickets', ticketPayload([], ['author' => 99999, 'assignee' => 99998]))
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors([
+                'data.relationships.author.data.id' => 'The selected data.relationships.author.data.id is invalid.',
+                'data.relationships.assignee.data.id' => 'The selected data.relationships.assignee.data.id is invalid.',
+            ]);
+    });
+
+    it('returns 401 when no token is provided', function () {
+        $this->postJson('/api/v1/tickets', ticketPayload())->assertUnauthorized();
+    });
+});
