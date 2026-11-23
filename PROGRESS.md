@@ -25,7 +25,7 @@ Statuses: Not Started · In Progress · Completed · Blocked
 | 16 | Deleting Resources with DELETE Requests | Completed |
 | 17 | Replacing Resources with PUT Requests | Completed |
 | 18 | Updating Resources with PATCH Requests | Completed |
-| 19 | Using Policies for User Authorization | Not Started |
+| 19 | Using Policies for User Authorization | Completed |
 | 20 | Controlling Access with Token Abilities | Not Started |
 | 21 | Applying Granular Permissions | Not Started |
 | 22 | Implementing the Users Products Controller | Not Started |
@@ -180,4 +180,12 @@ Statuses: Not Started · In Progress · Completed · Blocked
 - **Files:** `app/Http/Requests/Api/V1/UpdateTicketRequest.php` (new), `app/Http/Controllers/Api/V1/TicketController.php`, `routes/api_v1.php`, `tests/Feature/Api/V1/TicketControllerTest.php`.
 - **Testing:** 84 tests passing (status-only change keeps the other fields, priority-only change, assign then unassign, 422 for an invalid status leaves the row unchanged, 422 for an unknown assignee).
 - **Commit:** `Updating Resources with Patch Requests`
+- **Status:** Completed
+
+## Lesson 19: Using Policies for User Authorization
+- **Concepts:** authentication vs authorization; a Policy per model; registering a versioned policy with `Gate::policy()`; `AuthorizesRequests::authorize()`; an `isAble()` helper that returns a bool; 403 Forbidden.
+- **Ticket implementation:** `TicketPolicy::update()` (only the ticket's creator, for now), registered in `AppServiceProvider`. `APIController` uses `AuthorizesRequests` and adds `isAble()`. `ApiResponses::notAuthorized()` returns 403. `TicketController@update` asks the policy first.
+- **Files:** `app/Policies/V1/TicketPolicy.php` (new), `app/Providers/AppServiceProvider.php`, `app/Http/Controllers/Api/V1/APIController.php`, `app/Traits/ApiResponses.php`, `app/Http/Controllers/Api/V1/TicketController.php`, `tests/Feature/Policies/V1/TicketPolicyTest.php` (new), `tests/Feature/Api/V1/TicketControllerTest.php` (update tests now use the caller's own ticket).
+- **Testing:** 87 tests passing (policy allow/deny, PATCH of someone else's ticket returns 403 and leaves it unchanged, owner PATCH returns 200).
+- **Commit:** `Using Policies for User Authorization`
 - **Status:** Completed

@@ -298,7 +298,7 @@ describe('replace', function () {
 
 describe('update', function () {
     it('changes only the status', function () {
-        $ticket = Ticket::factory()->create(['status' => 'open', 'title' => 'Keep me']);
+        $ticket = Ticket::factory()->recycle($this->user)->create(['status' => 'open', 'title' => 'Keep me']);
 
         $this->withToken(jwtFor($this->user))
             ->patchJson("/api/v1/tickets/{$ticket->id}", ['data' => ['attributes' => ['status' => 'in_progress']]])
@@ -311,7 +311,7 @@ describe('update', function () {
     });
 
     it('changes only the priority', function () {
-        $ticket = Ticket::factory()->create(['priority' => 'low']);
+        $ticket = Ticket::factory()->recycle($this->user)->create(['priority' => 'low']);
 
         $this->withToken(jwtFor($this->user))
             ->patchJson("/api/v1/tickets/{$ticket->id}", ['data' => ['attributes' => ['priority' => 'urgent']]])
@@ -321,7 +321,7 @@ describe('update', function () {
     });
 
     it('assigns and then unassigns the ticket', function () {
-        $ticket = Ticket::factory()->create();
+        $ticket = Ticket::factory()->recycle($this->user)->create();
         $assignee = User::factory()->create();
         $token = jwtFor($this->user);
 
@@ -340,7 +340,7 @@ describe('update', function () {
     });
 
     it('returns 422 with the custom message for an invalid status', function () {
-        $ticket = Ticket::factory()->create(['status' => 'open']);
+        $ticket = Ticket::factory()->recycle($this->user)->create(['status' => 'open']);
 
         $this->withToken(jwtFor($this->user))
             ->patchJson("/api/v1/tickets/{$ticket->id}", ['data' => ['attributes' => ['status' => 'done']]])
@@ -353,11 +353,22 @@ describe('update', function () {
     });
 
     it('returns 422 when assigning a user that does not exist', function () {
-        $ticket = Ticket::factory()->create();
+        $ticket = Ticket::factory()->recycle($this->user)->create();
 
         $this->withToken(jwtFor($this->user))
             ->patchJson("/api/v1/tickets/{$ticket->id}", ['data' => ['relationships' => ['assignee' => ['data' => ['id' => 99999]]]]])
             ->assertUnprocessable()
             ->assertJsonValidationErrors(['data.relationships.assignee.data.id']);
     });
+});
+
+it('returns 403 and changes nothing when a user updates a ticket someone else raised', function () {
+    $ticket = Ticket::factory()->create(['title' => 'Original']);
+
+    $this->withToken(jwtFor($this->user))
+        ->patchJson("/api/v1/tickets/{$ticket->id}", ['data' => ['attributes' => ['title' => 'Hacked name']]])
+        ->assertForbidden()
+        ->assertExactJson(['message' => 'You are not authorized to update that resource.', 'status' => 403]);
+
+    expect($ticket->fresh()->title)->toBe('Original');
 });

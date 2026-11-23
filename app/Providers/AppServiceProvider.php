@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\Ticket;
+use App\Policies\V1\TicketPolicy;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +22,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // The policies live in a versioned folder, so the naming convention cannot find them
+        Gate::policy(Ticket::class, TicketPolicy::class);
     }
 }

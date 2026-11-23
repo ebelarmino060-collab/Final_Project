@@ -80,14 +80,19 @@ class TicketController extends APIController
     /**
      * PATCH /api/v1/tickets/{ticket}
      * Updates only the fields that were sent (see UpdateTicketRequest): for example just the
-     * status, just the priority, or just the assignee.
+     * status, just the priority, or just the assignee. Only if the policy allows it.
      */
-    public function update(UpdateTicketRequest $request, Ticket $ticket): TicketResource
+    public function update(UpdateTicketRequest $request, Ticket $ticket): TicketResource|JsonResponse
     {
-        // mappedAttributes() returns only the keys present in the request
-        $ticket->update($request->mappedAttributes());
+        // Ask TicketPolicy::update()
+        if ($this->isAble('update', $ticket)) {
+            // mappedAttributes() returns only the keys present in the request
+            $ticket->update($request->mappedAttributes());
 
-        return new TicketResource($ticket);
+            return new TicketResource($ticket);
+        }
+
+        return $this->notAuthorized('You are not authorized to update that resource.');
     }
 
     /**
