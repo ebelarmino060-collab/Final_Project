@@ -12,7 +12,7 @@ Statuses: Not Started · In Progress · Completed · Blocked
 | 3 | php artisan install:api | Completed |
 | 4 | Git Commit to Main | Completed |
 | 5 | API Response | Completed |
-| 6 | Designing the URL | Not Started |
+| 6 | Designing the URL | Completed |
 | 7 | How to Version Your API | Not Started |
 | 8 | Authentication with JWT | Not Started |
 | 9 | Designing Response Payloads | Not Started |
@@ -71,4 +71,13 @@ Statuses: Not Started · In Progress · Completed · Blocked
 - **Files:** `app/Traits/ApiResponses.php` (new), `tests/Feature/Traits/ApiResponsesTest.php` (new).
 - **Testing:** the lesson's temporary `/ping` route was replaced by a permanent Pest test (3 tests passing).
 - **Commit:** `Configure API response`
+- **Status:** Completed
+
+## Lesson 6: Designing the URL
+- **Concepts:** noun-based REST URLs, HTTP methods vs CRUD, and the Route / Controller / Model / Migration / Factory / Seeder pieces.
+- **Ticket implementation:** `Ticket` model with `#[Fillable]`, `tickets` migration (`ticket_number`, `title`, `description`, `status`, `priority`, `created_by`, `assigned_to`), string-backed enums `TicketStatus` (open, in_progress, pending, resolved, closed) and `TicketPriority` (low, medium, high, urgent) instead of the course's A/C/H/X codes, an auto-generated `ticket_number` (TCK-YYYYMMDD-XXXXXX), a factory with an `assigned()` state, and a seeder with 10 users and 100 tickets. The lesson's temporary `GET /api/tickets` route was added.
+- **Adjustment:** the suggested `category_id` is not included, because it would need a new categories table that no lesson covers.
+- **Files:** `app/Models/Ticket.php`, `app/Enums/TicketStatus.php`, `app/Enums/TicketPriority.php`, `database/migrations/*_create_tickets_table.php`, `database/factories/TicketFactory.php`, `database/seeders/DatabaseSeeder.php`, `routes/api.php`, `tests/Pest.php` (RefreshDatabase enabled), `tests/Feature/Models/TicketTest.php`, `tests/Feature/Api/TicketRoutesTest.php`.
+- **Testing:** `migrate` and `db:seed` ran (100 tickets, 10 users); 9 tests passing (ticket-number generation, enum casts, `GET /api/tickets`).
+- **Commit:** `URL Designing`
 - **Status:** Completed

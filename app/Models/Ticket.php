@@ -1,0 +1,53 @@
+<?php
+
+namespace App\Models;
+
+use App\Enums\TicketPriority;
+use App\Enums\TicketStatus;
+use Database\Factories\TicketFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
+
+/**
+ * A support ticket raised by a user (its author) and optionally assigned to another user.
+ * Fillable lists the columns that may be mass assigned with Ticket::create([...]).
+ */
+#[Fillable(['title', 'description', 'status', 'priority', 'created_by', 'assigned_to'])]
+class Ticket extends Model
+{
+    /** @use HasFactory<TicketFactory> */
+    use HasFactory;
+
+    /**
+     * Give every new ticket a ticket number unless one was already set.
+     */
+    protected static function booted(): void
+    {
+        static::creating(function (Ticket $ticket): void {
+            $ticket->ticket_number ??= self::generateTicketNumber();
+        });
+    }
+
+    /**
+     * Build a new ticket reference such as TCK-20261123-AB12CD.
+     */
+    public static function generateTicketNumber(): string
+    {
+        return 'TCK-'.now()->format('Ymd').'-'.Str::upper(Str::random(6));
+    }
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'status' => TicketStatus::class,
+            'priority' => TicketPriority::class,
+        ];
+    }
+}
