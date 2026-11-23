@@ -11,7 +11,7 @@ Statuses: Not Started · In Progress · Completed · Blocked
 | 2 | Laravel Installation | Completed |
 | 3 | php artisan install:api | Completed |
 | 4 | Git Commit to Main | Completed |
-| 5 | API Response | Not Started |
+| 5 | API Response | Completed |
 | 6 | Designing the URL | Not Started |
 | 7 | How to Version Your API | Not Started |
 | 8 | Authentication with JWT | Not Started |
@@ -63,4 +63,12 @@ Statuses: Not Started · In Progress · Completed · Blocked
 - **Ticket implementation:** the repository and `main` branch already existed, so the lesson's commit is made on top of the existing history.
 - **Commit:** `Initialize Laravel project`
 - **Testing:** push to `origin main` succeeded.
+- **Status:** Completed
+
+## Lesson 5: API Response
+- **Concepts:** HTTP status code families (2xx/4xx/5xx), 401 vs 403, PHP traits for shared response helpers.
+- **Ticket implementation:** `ApiResponses` trait with `ok()`, `success()` and `error()`; every Ticket API response uses the same `data` / `message` / `status` shape.
+- **Files:** `app/Traits/ApiResponses.php` (new), `tests/Feature/Traits/ApiResponsesTest.php` (new).
+- **Testing:** the lesson's temporary `/ping` route was replaced by a permanent Pest test (3 tests passing).
+- **Commit:** `Configure API response`
 - **Status:** Completed
