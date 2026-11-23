@@ -45,6 +45,41 @@ class BaseTicketRequest extends FormRequest
     }
 
     /**
+     * Descriptions and examples that Scribe shows in the documentation.
+     *
+     * @return array<string, array{description: string, example: mixed}>
+     */
+    public function bodyParameters(): array
+    {
+        return [
+            'data.attributes.title' => [
+                'description' => 'A short summary of the problem.',
+                'example' => 'Printer on the second floor is offline',
+            ],
+            'data.attributes.description' => [
+                'description' => 'The full description of the problem.',
+                'example' => 'The printer shows error E-104 and does not accept print jobs.',
+            ],
+            'data.attributes.status' => [
+                'description' => 'The ticket status: '.implode(', ', TicketStatus::values()).'.',
+                'example' => TicketStatus::Open->value,
+            ],
+            'data.attributes.priority' => [
+                'description' => 'The ticket priority: '.implode(', ', TicketPriority::values()).'.',
+                'example' => TicketPriority::High->value,
+            ],
+            'data.relationships.author.data.id' => [
+                'description' => 'The id of the user who raised the ticket. Regular users must use their own id.',
+                'example' => 1,
+            ],
+            'data.relationships.assignee.data.id' => [
+                'description' => 'The id of the user the ticket is assigned to, or null to unassign.',
+                'example' => 2,
+            ],
+        ];
+    }
+
+    /**
      * Custom validation messages. The key format is "field.rule".
      *
      * @return array<string, string>

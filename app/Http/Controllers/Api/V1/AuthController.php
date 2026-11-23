@@ -11,13 +11,25 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
+/**
+ * @group Authentication
+ *
+ * Register, log in, read the current user, refresh and log out. Tokens are JWTs: send them as
+ * `Authorization: Bearer {token}` on every other request.
+ */
 class AuthController extends Controller
 {
     // Gives this controller the ok(), success() and error() response helpers
     use ApiResponses;
 
     /**
+     * Register
+     *
      * Creates the account and logs the user in immediately.
+     *
+     * @unauthenticated
+     *
+     * @response 200 {"data":{"access_token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...","token_type":"bearer","expires_in":3600},"message":"Registered successfully","status":200}
      */
     public function register(RegisterUserRequest $request): JsonResponse
     {
@@ -35,7 +47,14 @@ class AuthController extends Controller
     }
 
     /**
-     * Checks the credentials and returns a token when they are correct.
+     * Log in
+     *
+     * Returns an access token. Send it as a Bearer token on every other request.
+     *
+     * @unauthenticated
+     *
+     * @response 200 {"data":{"access_token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...","token_type":"bearer","expires_in":3600},"message":"Login successful","status":200}
+     * @response 401 scenario="Wrong email or password" {"message":"Invalid credentials","status":401}
      */
     public function login(LoginUserRequest $request): JsonResponse
     {
@@ -50,7 +69,11 @@ class AuthController extends Controller
     }
 
     /**
+     * Current user
+     *
      * Returns the user that owns the Bearer token.
+     *
+     * @response 200 {"data":{"id":11,"name":"The Manager","email":"manager@manager.com","email_verified_at":"2026-11-23T14:53:00.000000Z","is_manager":true,"created_at":"2026-11-23T14:53:00.000000Z","updated_at":"2026-11-23T14:53:00.000000Z"},"message":"User retrieved","status":200}
      */
     public function me(): JsonResponse
     {
@@ -58,7 +81,11 @@ class AuthController extends Controller
     }
 
     /**
+     * Refresh the token
+     *
      * Blacklists the current token and returns a brand-new one.
+     *
+     * @response 200 {"data":{"access_token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...","token_type":"bearer","expires_in":3600},"message":"Token refreshed","status":200}
      */
     public function refresh(): JsonResponse
     {
@@ -66,7 +93,11 @@ class AuthController extends Controller
     }
 
     /**
+     * Log out
+     *
      * Blacklists the current token so it can never be used again.
+     *
+     * @response 200 {"data":null,"message":"Successfully logged out","status":200}
      */
     public function logout(): JsonResponse
     {

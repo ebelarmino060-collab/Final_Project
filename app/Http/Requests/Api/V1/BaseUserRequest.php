@@ -44,4 +44,31 @@ class BaseUserRequest extends FormRequest
 
         return $attributesToUpdate;
     }
+
+    /**
+     * Descriptions and examples that Scribe shows in the documentation.
+     *
+     * @return array<string, array{description: string, example: mixed}>
+     */
+    public function bodyParameters(): array
+    {
+        return [
+            'data.attributes.name' => [
+                'description' => 'The user\'s full name.',
+                'example' => 'New Staff',
+            ],
+            'data.attributes.email' => [
+                'description' => 'A unique email address.',
+                'example' => 'staff@example.com',
+            ],
+            'data.attributes.isManager' => [
+                'description' => 'Whether the user is a manager.',
+                'example' => false,
+            ],
+            'data.attributes.password' => [
+                'description' => 'At least 8 characters. It is hashed before it is stored.',
+                'example' => 'password123',
+            ],
+        ];
+    }
 }

@@ -25,6 +25,10 @@ class StoreTicketRequest extends BaseTicketRequest
     /**
      * Validation rules for creating a ticket (deny by default).
      *
+     * Null-safe so Scribe can read the rules while no user is logged in: it then sees the
+     * full (manager) rule set. Real requests always have a user because every ticket
+     * route sits behind auth:api.
+     *
      * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
@@ -43,13 +47,13 @@ class StoreTicketRequest extends BaseTicketRequest
             'data.attributes.status' => ['sometimes', 'string', Rule::enum(TicketStatus::class)],
             'data.attributes.priority' => ['sometimes', 'string', Rule::enum(TicketPriority::class)],
             // Default: the author must be the logged-in user (size:5 means the id must equal 5)
-            $authorIdAttribute => [...$authorRule, 'size:'.$user->id],
+            $authorIdAttribute => $user ? [...$authorRule, 'size:'.$user->id] : $authorRule,
             // Default: nobody may assign the new ticket
-            'data.relationships.assignee.data.id' => ['prohibited'],
+            'data.relationships.assignee.data.id' => $user ? ['prohibited'] : $assigneeRule,
         ];
 
         // Only the broad ability lifts both restrictions (managers)
-        if ($user->tokenCan(Abilities::CreateTicket)) {
+        if ($user?->tokenCan(Abilities::CreateTicket)) {
             $rules[$authorIdAttribute] = $authorRule;
             $rules['data.relationships.assignee.data.id'] = $assigneeRule;
         }
@@ -58,12 +62,35 @@ class StoreTicketRequest extends BaseTicketRequest
     }
 
     /**
+     * Descriptions and examples that Scribe shows in the documentation.
+     *
+     * @return array<string, array{description: string, example: mixed}>
+     */
+    public function bodyParameters(): array
+    {
+        $documentation = parent::bodyParameters();
+
+        // The author id is in the body on /tickets, and in the URL on /users/{user}/tickets
+        if ($this->authorIdAttribute() === 'author') {
+            unset($documentation['data.relationships.author.data.id']);
+            $documentation['author'] = [
+                'description' => 'The author id. It is taken from the URL, so repeat the {user} path value.',
+                'example' => 1,
+            ];
+        }
+
+        $documentation['data.relationships.assignee.data.id']['description'] .= ' Managers only: regular users may not assign a new ticket.';
+
+        return $documentation;
+    }
+
+    /**
      * Where the author id comes from: the body on /tickets,
      * or the URL (merged into "author" below) on /users/{user}/tickets.
      */
     protected function authorIdAttribute(): string
     {
-        return $this->routeIs('tickets.store') ? 'data.relationships.author.data.id' : 'author';
+        return $this->routeIs('users.tickets.store') ? 'author' : 'data.relationships.author.data.id';
     }
 
     /**

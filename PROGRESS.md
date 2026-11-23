@@ -32,7 +32,7 @@ Statuses: Not Started · In Progress · Completed · Blocked
 | 23 | Managing Users | Completed |
 | 24 | The Principle of Least Privilege | Completed |
 | 25 | Handling Errors | Completed |
-| 26 | API Documentation with Scribe | Not Started |
+| 26 | API Documentation with Scribe | Completed |
 | 27 | Appendix A: Where Each File Is Finished | Not Started |
 
 ---
@@ -239,4 +239,13 @@ Statuses: Not Started · In Progress · Completed · Blocked
 - **Files:** `app/Traits/ApiResponses.php`, `app/Exceptions/Handler.php` (new), `bootstrap/app.php`, `tests/Pest.php` (macro), `tests/Feature/Exceptions/HandlerTest.php` (new), `tests/Feature/Traits/ApiResponsesTest.php`, and the API feature tests (assertions moved to the new format).
 - **Testing:** 147 tests passing (401, 404 model, 404 route, 422 list, 405, a 500 that hides its secret message when debug is off, debug details when on, status text for HTTP errors, web 404 stays HTML). Live check on `php artisan serve` confirmed the 401, 404 and 405 JSON and a text/html web 404.
 - **Commit:** `Handling Errors`
+- **Status:** Completed
+
+## Lesson 26: API Documentation with Scribe
+- **Concepts:** documentation generated from code (routes, Form Request rules, DocBlocks, API Resources) as an HTML page with Try It Out, a Postman collection and an OpenAPI spec; `@group`, `@queryParam`, `@unauthenticated`; null-safe `rules()` so Scribe can read them without a logged-in user.
+- **Ticket implementation:** `knuckleswtf/scribe` 5.11 (dev). `config/scribe.php`: title, description, intro, and bearer auth on by default (`Authorization` header, login instructions). `StoreTicketRequest` / `UpdateTicketRequest` rules are null-safe (without a user Scribe sees the full manager rule set; real requests always have a user because of `auth:api`). `bodyParameters()` for the ticket, user and auth requests. DocBlocks on all five controllers (Authentication, Tickets, Authors, Users, User Tickets) with titles, descriptions, every filter as `@queryParam`, and `@apiResource` / `@apiResourceCollection` + `@apiResourceModel` examples (built with factories inside a rolled-back transaction).
+- **Adjustment:** Scribe's live "response calls" are switched off: every endpoint needs a real JWT, so they would only have documented 401 responses. Examples come from the resources and `@response` tags (including 403/404/422 error shapes) instead.
+- **Files:** `composer.json`, `composer.lock`, `config/scribe.php` (new), `.scribe/` (new), `resources/views/scribe/` (new), `public/vendor/scribe/` (new), `storage/app/private/scribe/` (Postman + OpenAPI, force-added), all five V1 controllers, `BaseTicketRequest.php`, `StoreTicketRequest.php`, `UpdateTicketRequest.php`, `BaseUserRequest.php`, `RegisterUserRequest.php`, `LoginUserRequest.php`.
+- **Testing:** `php artisan scribe:generate` finishes with no errors or warnings: 24 endpoints in 5 groups. `/docs` (HTML), `/docs.postman` and `/docs.openapi` all return 200. The generated example for `GET /tickets` shows the real resource shape and all 12 query parameters. The database is unchanged after generation. 147 tests still pass.
+- **Commit:** `API Documentation with Scribe`
 - **Status:** Completed

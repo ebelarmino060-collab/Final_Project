@@ -1,0 +1,1332 @@
+{
+    "variable": [
+        {
+            "id": "baseUrl",
+            "key": "baseUrl",
+            "type": "string",
+            "name": "string",
+            "value": "http:\/\/localhost:8000"
+        }
+    ],
+    "info": {
+        "name": "Ticket Management API Documentation",
+        "_postman_id": "8b4a063b-35f0-4a2d-abfe-44a6b1374a1b",
+        "description": "A versioned JSON:API style REST API for raising, assigning, filtering and resolving support tickets, secured with JWT and token abilities.",
+        "schema": "https:\/\/schema.getpostman.com\/json\/collection\/v2.1.0\/collection.json"
+    },
+    "item": [
+        {
+            "name": "Authentication",
+            "description": "\nRegister, log in, read the current user, refresh and log out. Tokens are JWTs: send them as\n`Authorization: Bearer {token}` on every other request.",
+            "item": [
+                {
+                    "name": "Register",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/auth\/register",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/auth\/register"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"name\":\"Jane Doe\",\"email\":\"jane@example.com\",\"password\":\"password\"}"
+                        },
+                        "description": "Creates the account and logs the user in immediately.",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\":{\"access_token\":\"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...\",\"token_type\":\"bearer\",\"expires_in\":3600},\"message\":\"Registered successfully\",\"status\":200}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Log in",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/auth\/login",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/auth\/login"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"email\":\"manager@manager.com\",\"password\":\"password\"}"
+                        },
+                        "description": "Returns an access token. Send it as a Bearer token on every other request.",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\":{\"access_token\":\"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...\",\"token_type\":\"bearer\",\"expires_in\":3600},\"message\":\"Login successful\",\"status\":200}",
+                            "name": ""
+                        },
+                        {
+                            "header": [],
+                            "code": 401,
+                            "body": "{\"message\":\"Invalid credentials\",\"status\":401}",
+                            "name": "Wrong email or password"
+                        }
+                    ]
+                },
+                {
+                    "name": "Log out",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/auth\/logout",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/auth\/logout"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Blacklists the current token so it can never be used again."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\":null,\"message\":\"Successfully logged out\",\"status\":200}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Current user",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/auth\/me",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/auth\/me"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Returns the user that owns the Bearer token."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\":{\"id\":11,\"name\":\"The Manager\",\"email\":\"manager@manager.com\",\"email_verified_at\":\"2026-11-23T14:53:00.000000Z\",\"is_manager\":true,\"created_at\":\"2026-11-23T14:53:00.000000Z\",\"updated_at\":\"2026-11-23T14:53:00.000000Z\"},\"message\":\"User retrieved\",\"status\":200}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Refresh the token",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/auth\/refresh",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/auth\/refresh"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Blacklists the current token and returns a brand-new one."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\":{\"access_token\":\"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...\",\"token_type\":\"bearer\",\"expires_in\":3600},\"message\":\"Token refreshed\",\"status\":200}",
+                            "name": ""
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Authors",
+            "description": "\nRead-only view of the users who have raised tickets.",
+            "item": [
+                {
+                    "name": "List authors",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/authors",
+                            "query": [
+                                {
+                                    "key": "id",
+                                    "value": "1,2",
+                                    "description": "Filter by one or several ids.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "name",
+                                    "value": "*john*",
+                                    "description": "Filter by name. Use * as a wildcard.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "email",
+                                    "value": "*@example.com",
+                                    "description": "Filter by email. Use * as a wildcard.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "createdAt",
+                                    "value": "2026-01-01,2026-12-31",
+                                    "description": "A date, or a range as from,to.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "sort",
+                                    "value": "name",
+                                    "description": "Sort by name, email, createdAt or updatedAt. Prefix with - for descending.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "include",
+                                    "value": "tickets",
+                                    "description": "Include the tickets each author raised.",
+                                    "disabled": false
+                                }
+                            ],
+                            "raw": "{{baseUrl}}\/api\/v1\/authors?id=1%2C2&name=%2Ajohn%2A&email=%2A%40example.com&createdAt=2026-01-01%2C2026-12-31&sort=name&include=tickets"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Lists only users who raised at least one ticket, 15 per page."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\":[{\"type\":\"user\",\"id\":98,\"attributes\":{\"name\":\"Morgan Hirthe\",\"email\":\"dare.emelie@example.com\",\"isManager\":false,\"emailVerifiedAt\":\"2026-11-23T15:10:18.000000Z\",\"createdAt\":\"2026-11-23T15:10:18.000000Z\",\"updatedAt\":\"2026-11-23T15:10:18.000000Z\"},\"links\":{\"self\":\"http:\\\/\\\/localhost:8000\\\/api\\\/v1\\\/authors\\\/98\"}},{\"type\":\"user\",\"id\":99,\"attributes\":{\"name\":\"Prof. Mina Bauch\",\"email\":\"okeefe.isidro@example.org\",\"isManager\":false,\"emailVerifiedAt\":\"2026-11-23T15:10:18.000000Z\",\"createdAt\":\"2026-11-23T15:10:18.000000Z\",\"updatedAt\":\"2026-11-23T15:10:18.000000Z\"},\"links\":{\"self\":\"http:\\\/\\\/localhost:8000\\\/api\\\/v1\\\/authors\\\/99\"}}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":15,\"to\":2,\"total\":2}}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Show an author",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/authors\/:id",
+                            "query": [
+                                {
+                                    "key": "include",
+                                    "value": "tickets",
+                                    "description": "Include the tickets this author raised.",
+                                    "disabled": false
+                                }
+                            ],
+                            "raw": "{{baseUrl}}\/api\/v1\/authors\/:id?include=tickets",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": 1,
+                                    "description": "The ID of the author."
+                                },
+                                {
+                                    "id": "author",
+                                    "key": "author",
+                                    "value": 1,
+                                    "description": "The user id."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\":{\"type\":\"user\",\"id\":100,\"attributes\":{\"name\":\"Morgan Hirthe\",\"email\":\"imclaughlin@example.org\",\"isManager\":false,\"emailVerifiedAt\":\"2026-11-23T15:10:18.000000Z\",\"createdAt\":\"2026-11-23T15:10:18.000000Z\",\"updatedAt\":\"2026-11-23T15:10:18.000000Z\"},\"links\":{\"self\":\"http:\\\/\\\/localhost:8000\\\/api\\\/v1\\\/authors\\\/100\"}}}",
+                            "name": ""
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Tickets",
+            "description": "\nCreate, read, update and delete support tickets. Regular users act on the tickets they\nraised; managers act on any ticket and are the only ones who can assign tickets.",
+            "item": [
+                {
+                    "name": "List tickets",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/tickets",
+                            "query": [
+                                {
+                                    "key": "status",
+                                    "value": "open,in_progress",
+                                    "description": "Filter by status. Use a comma for several.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "priority",
+                                    "value": "high,urgent",
+                                    "description": "Filter by priority. Use a comma for several.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "search",
+                                    "value": "printer",
+                                    "description": "Search the ticket number and the title.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "title",
+                                    "value": "*printer*",
+                                    "description": "Filter by title. Use * as a wildcard.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "ticketNumber",
+                                    "value": "TCK-2026*",
+                                    "description": "Filter by ticket number. Use * as a wildcard.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "createdBy",
+                                    "value": "1",
+                                    "description": "Tickets raised by these user ids.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "assignedTo",
+                                    "value": "2",
+                                    "description": "Tickets assigned to these user ids.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "createdAt",
+                                    "value": "2026-01-01,2026-12-31",
+                                    "description": "A date, or a range as from,to.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "updatedAt",
+                                    "value": "2026-11-23",
+                                    "description": "A date, or a range as from,to.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "sort",
+                                    "value": "-priority,createdAt",
+                                    "description": "Sort by ticketNumber, title, status, priority, createdAt or updatedAt. Prefix with - for descending.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "include",
+                                    "value": "author",
+                                    "description": "Include related users: author, assignee.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "The page number.",
+                                    "disabled": false
+                                }
+                            ],
+                            "raw": "{{baseUrl}}\/api\/v1\/tickets?status=open%2Cin_progress&priority=high%2Curgent&search=printer&title=%2Aprinter%2A&ticketNumber=TCK-2026%2A&createdBy=1&assignedTo=2&createdAt=2026-01-01%2C2026-12-31&updatedAt=2026-11-23&sort=-priority%2CcreatedAt&include=author&page=1"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Returns a paginated list of tickets (15 per page, without descriptions). Supports filtering,\nsearching, sorting and including the author and assignee."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\":[{\"type\":\"ticket\",\"id\":145,\"attributes\":{\"ticketNumber\":\"TCK-20261123-EIW6VH\",\"title\":\"Adipisci quidem nostrum qui commodi.\",\"status\":\"resolved\",\"priority\":\"high\",\"createdAt\":\"2026-11-23T15:10:18.000000Z\",\"updatedAt\":\"2026-11-23T15:10:18.000000Z\"},\"relationships\":{\"author\":{\"data\":{\"type\":\"user\",\"id\":92},\"links\":{\"self\":\"http:\\\/\\\/localhost:8000\\\/api\\\/v1\\\/authors\\\/92\"}},\"assignee\":{\"data\":null}},\"links\":{\"self\":\"http:\\\/\\\/localhost:8000\\\/api\\\/v1\\\/tickets\\\/145\"}},{\"type\":\"ticket\",\"id\":146,\"attributes\":{\"ticketNumber\":\"TCK-20261123-NNFBNN\",\"title\":\"Dignissimos neque blanditiis.\",\"status\":\"closed\",\"priority\":\"low\",\"createdAt\":\"2026-11-23T15:10:18.000000Z\",\"updatedAt\":\"2026-11-23T15:10:18.000000Z\"},\"relationships\":{\"author\":{\"data\":{\"type\":\"user\",\"id\":93},\"links\":{\"self\":\"http:\\\/\\\/localhost:8000\\\/api\\\/v1\\\/authors\\\/93\"}},\"assignee\":{\"data\":null}},\"links\":{\"self\":\"http:\\\/\\\/localhost:8000\\\/api\\\/v1\\\/tickets\\\/146\"}}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":15,\"to\":2,\"total\":2}}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Create a ticket",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/tickets",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/tickets"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"data\":{\"attributes\":{\"title\":\"Printer on the second floor is offline\",\"description\":\"The printer shows error E-104 and does not accept print jobs.\",\"status\":\"open\",\"priority\":\"high\"},\"relationships\":{\"author\":{\"data\":{\"id\":1}},\"assignee\":{\"data\":{\"id\":2}}}}}"
+                        },
+                        "description": "Managers can choose any author and an assignee. Regular users can only create tickets\nfor themselves and cannot assign them. The ticket number is generated by the server."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 201,
+                            "body": "{\"data\":{\"type\":\"ticket\",\"id\":147,\"attributes\":{\"ticketNumber\":\"TCK-20261123-KTXZXK\",\"title\":\"Eius et animi quos.\",\"description\":\"Fugiat sunt nihil accusantium harum mollitia. Deserunt aut ab provident perspiciatis quo omnis nostrum. Adipisci quidem nostrum qui commodi incidunt iure.\",\"status\":\"closed\",\"priority\":\"high\",\"createdAt\":\"2026-11-23T15:10:18.000000Z\",\"updatedAt\":\"2026-11-23T15:10:18.000000Z\"},\"relationships\":{\"author\":{\"data\":{\"type\":\"user\",\"id\":94},\"links\":{\"self\":\"http:\\\/\\\/localhost:8000\\\/api\\\/v1\\\/authors\\\/94\"}},\"assignee\":{\"data\":null}},\"links\":{\"self\":\"http:\\\/\\\/localhost:8000\\\/api\\\/v1\\\/tickets\\\/147\"}}}",
+                            "name": ""
+                        },
+                        {
+                            "header": [],
+                            "code": 422,
+                            "body": "{\"errors\":[{\"status\":422,\"message\":\"The data.attributes.title field is required.\",\"source\":\"data.attributes.title\"}]}",
+                            "name": "Validation failed"
+                        }
+                    ]
+                },
+                {
+                    "name": "Show a ticket",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/tickets\/:id",
+                            "query": [
+                                {
+                                    "key": "include",
+                                    "value": "author,assignee",
+                                    "description": "Include related users: author, assignee.",
+                                    "disabled": false
+                                }
+                            ],
+                            "raw": "{{baseUrl}}\/api\/v1\/tickets\/:id?include=author%2Cassignee",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": 1,
+                                    "description": "The ID of the ticket."
+                                },
+                                {
+                                    "id": "ticket",
+                                    "key": "ticket",
+                                    "value": 1,
+                                    "description": "The ticket id."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Returns one ticket, including its description."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\":{\"type\":\"ticket\",\"id\":148,\"attributes\":{\"ticketNumber\":\"TCK-20261123-CAXDRO\",\"title\":\"Adipisci quidem nostrum qui commodi.\",\"description\":\"Odit et et modi. Nostrum omnis autem et consequatur aut. Enim non facere tempora ex voluptatem laboriosam praesentium. Adipisci molestias fugit deleniti distinctio eum doloremque id.\",\"status\":\"resolved\",\"priority\":\"high\",\"createdAt\":\"2026-11-23T15:10:18.000000Z\",\"updatedAt\":\"2026-11-23T15:10:18.000000Z\"},\"relationships\":{\"author\":{\"data\":{\"type\":\"user\",\"id\":95},\"links\":{\"self\":\"http:\\\/\\\/localhost:8000\\\/api\\\/v1\\\/authors\\\/95\"}},\"assignee\":{\"data\":null}},\"links\":{\"self\":\"http:\\\/\\\/localhost:8000\\\/api\\\/v1\\\/tickets\\\/148\"}}}",
+                            "name": ""
+                        },
+                        {
+                            "header": [],
+                            "code": 404,
+                            "body": "{\"errors\":[{\"status\":404,\"message\":\"The resource cannot be found.\",\"source\":\"App\\\\Models\\\\Ticket\"}]}",
+                            "name": "Ticket not found"
+                        }
+                    ]
+                },
+                {
+                    "name": "Delete a ticket",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/tickets\/:id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/tickets\/:id",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": 1,
+                                    "description": "The ID of the ticket."
+                                },
+                                {
+                                    "id": "ticket",
+                                    "key": "ticket",
+                                    "value": 1,
+                                    "description": "The ticket id."
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Regular users can delete the tickets they raised; managers can delete any ticket."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\":null,\"message\":\"Ticket successfully deleted\",\"status\":200}",
+                            "name": ""
+                        },
+                        {
+                            "header": [],
+                            "code": 403,
+                            "body": "{\"errors\":[{\"status\":403,\"message\":\"You are not authorized to delete that resource.\",\"source\":\"\"}]}",
+                            "name": "Not your ticket"
+                        }
+                    ]
+                },
+                {
+                    "name": "Replace a ticket",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/tickets\/:ticket_id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/tickets\/:ticket_id",
+                            "variable": [
+                                {
+                                    "id": "ticket_id",
+                                    "key": "ticket_id",
+                                    "value": 1,
+                                    "description": "The ID of the ticket."
+                                },
+                                {
+                                    "id": "ticket",
+                                    "key": "ticket",
+                                    "value": 1,
+                                    "description": "The ticket id."
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"data\":{\"attributes\":{\"title\":\"Printer on the second floor is offline\",\"description\":\"The printer shows error E-104 and does not accept print jobs.\",\"status\":\"open\",\"priority\":\"high\"},\"relationships\":{\"author\":{\"data\":{\"id\":1}},\"assignee\":{\"data\":{\"id\":2}}}}}"
+                        },
+                        "description": "Replaces every field of the ticket (managers only). The assignee must be sent, but may be null."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\":{\"type\":\"ticket\",\"id\":149,\"attributes\":{\"ticketNumber\":\"TCK-20261123-5QR2LT\",\"title\":\"Eius et animi quos.\",\"description\":\"Fugiat sunt nihil accusantium harum mollitia. Deserunt aut ab provident perspiciatis quo omnis nostrum. Adipisci quidem nostrum qui commodi incidunt iure.\",\"status\":\"closed\",\"priority\":\"high\",\"createdAt\":\"2026-11-23T15:10:18.000000Z\",\"updatedAt\":\"2026-11-23T15:10:18.000000Z\"},\"relationships\":{\"author\":{\"data\":{\"type\":\"user\",\"id\":96},\"links\":{\"self\":\"http:\\\/\\\/localhost:8000\\\/api\\\/v1\\\/authors\\\/96\"}},\"assignee\":{\"data\":null}},\"links\":{\"self\":\"http:\\\/\\\/localhost:8000\\\/api\\\/v1\\\/tickets\\\/149\"}}}",
+                            "name": ""
+                        },
+                        {
+                            "header": [],
+                            "code": 403,
+                            "body": "{\"errors\":[{\"status\":403,\"message\":\"You are not authorized to replace that resource.\",\"source\":\"\"}]}",
+                            "name": "Not a manager"
+                        }
+                    ]
+                },
+                {
+                    "name": "Update a ticket",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/tickets\/:ticket_id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/tickets\/:ticket_id",
+                            "variable": [
+                                {
+                                    "id": "ticket_id",
+                                    "key": "ticket_id",
+                                    "value": 1,
+                                    "description": "The ID of the ticket."
+                                },
+                                {
+                                    "id": "ticket",
+                                    "key": "ticket",
+                                    "value": 1,
+                                    "description": "The ticket id."
+                                }
+                            ]
+                        },
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"data\":{\"attributes\":{\"title\":\"Printer on the second floor is offline\",\"description\":\"The printer shows error E-104 and does not accept print jobs.\",\"status\":\"open\",\"priority\":\"high\"},\"relationships\":{\"author\":{\"data\":{\"id\":1}},\"assignee\":{\"data\":{\"id\":2}}}}}"
+                        },
+                        "description": "Changes only the fields that are sent: for example just the status, just the priority,\nor (managers only) the assignee or the author."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\":{\"type\":\"ticket\",\"id\":150,\"attributes\":{\"ticketNumber\":\"TCK-20261123-83TISY\",\"title\":\"Eius et animi quos.\",\"description\":\"Fugiat sunt nihil accusantium harum mollitia. Deserunt aut ab provident perspiciatis quo omnis nostrum. Adipisci quidem nostrum qui commodi incidunt iure.\",\"status\":\"closed\",\"priority\":\"high\",\"createdAt\":\"2026-11-23T15:10:18.000000Z\",\"updatedAt\":\"2026-11-23T15:10:18.000000Z\"},\"relationships\":{\"author\":{\"data\":{\"type\":\"user\",\"id\":97},\"links\":{\"self\":\"http:\\\/\\\/localhost:8000\\\/api\\\/v1\\\/authors\\\/97\"}},\"assignee\":{\"data\":null}},\"links\":{\"self\":\"http:\\\/\\\/localhost:8000\\\/api\\\/v1\\\/tickets\\\/150\"}}}",
+                            "name": ""
+                        },
+                        {
+                            "header": [],
+                            "code": 403,
+                            "body": "{\"errors\":[{\"status\":403,\"message\":\"You are not authorized to update that resource.\",\"source\":\"\"}]}",
+                            "name": "Not your ticket"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "User Tickets",
+            "description": "\nThe tickets raised by one user: \/api\/v1\/users\/{user}\/tickets. A ticket that does not\nbelong to the user in the URL returns 404. The same permissions apply as on \/tickets.",
+            "item": [
+                {
+                    "name": "List a user's tickets",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/users\/:user_id\/tickets",
+                            "query": [
+                                {
+                                    "key": "status",
+                                    "value": "open",
+                                    "description": "Filter by status. Use a comma for several.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "priority",
+                                    "value": "urgent",
+                                    "description": "Filter by priority. Use a comma for several.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "search",
+                                    "value": "printer",
+                                    "description": "Search the ticket number and the title.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "sort",
+                                    "value": "-createdAt",
+                                    "description": "Sort by ticketNumber, title, status, priority, createdAt or updatedAt.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "include",
+                                    "value": "assignee",
+                                    "description": "Include related users: author, assignee.",
+                                    "disabled": false
+                                }
+                            ],
+                            "raw": "{{baseUrl}}\/api\/v1\/users\/:user_id\/tickets?status=open&priority=urgent&search=printer&sort=-createdAt&include=assignee",
+                            "variable": [
+                                {
+                                    "id": "user_id",
+                                    "key": "user_id",
+                                    "value": 1,
+                                    "description": "The ID of the user."
+                                },
+                                {
+                                    "id": "user",
+                                    "key": "user",
+                                    "value": 1,
+                                    "description": "The user id."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Lists only the tickets this user raised. Every ticket filter and sort works here too."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\":[{\"type\":\"ticket\",\"id\":151,\"attributes\":{\"ticketNumber\":\"TCK-20261123-IVX6KO\",\"title\":\"Adipisci quidem nostrum qui commodi.\",\"status\":\"resolved\",\"priority\":\"high\",\"createdAt\":\"2026-11-23T15:10:18.000000Z\",\"updatedAt\":\"2026-11-23T15:10:18.000000Z\"},\"relationships\":{\"author\":{\"data\":{\"type\":\"user\",\"id\":107},\"links\":{\"self\":\"http:\\\/\\\/localhost:8000\\\/api\\\/v1\\\/authors\\\/107\"}},\"assignee\":{\"data\":null}},\"links\":{\"self\":\"http:\\\/\\\/localhost:8000\\\/api\\\/v1\\\/tickets\\\/151\"}},{\"type\":\"ticket\",\"id\":152,\"attributes\":{\"ticketNumber\":\"TCK-20261123-OKQCON\",\"title\":\"Repudiandae laboriosam est alias.\",\"status\":\"in_progress\",\"priority\":\"high\",\"createdAt\":\"2026-11-23T15:10:18.000000Z\",\"updatedAt\":\"2026-11-23T15:10:18.000000Z\"},\"relationships\":{\"author\":{\"data\":{\"type\":\"user\",\"id\":108},\"links\":{\"self\":\"http:\\\/\\\/localhost:8000\\\/api\\\/v1\\\/authors\\\/108\"}},\"assignee\":{\"data\":null}},\"links\":{\"self\":\"http:\\\/\\\/localhost:8000\\\/api\\\/v1\\\/tickets\\\/152\"}}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":15,\"to\":2,\"total\":2}}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Create a ticket for a user",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/users\/:user_id\/tickets",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/users\/:user_id\/tickets",
+                            "variable": [
+                                {
+                                    "id": "user_id",
+                                    "key": "user_id",
+                                    "value": 1,
+                                    "description": "The ID of the user."
+                                },
+                                {
+                                    "id": "user",
+                                    "key": "user",
+                                    "value": 1,
+                                    "description": "The user id."
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"data\":{\"attributes\":{\"title\":\"Printer on the second floor is offline\",\"description\":\"The printer shows error E-104 and does not accept print jobs.\",\"status\":\"open\",\"priority\":\"high\"},\"relationships\":{\"assignee\":{\"data\":{\"id\":2}}}},\"author\":1}"
+                        },
+                        "description": "Creates a ticket raised by the user in the URL. Regular users can only use their own id."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 201,
+                            "body": "{\"data\":{\"type\":\"ticket\",\"id\":153,\"attributes\":{\"ticketNumber\":\"TCK-20261123-G7ST2Z\",\"title\":\"Eius et animi quos.\",\"description\":\"Fugiat sunt nihil accusantium harum mollitia. Deserunt aut ab provident perspiciatis quo omnis nostrum. Adipisci quidem nostrum qui commodi incidunt iure.\",\"status\":\"closed\",\"priority\":\"high\",\"createdAt\":\"2026-11-23T15:10:18.000000Z\",\"updatedAt\":\"2026-11-23T15:10:18.000000Z\"},\"relationships\":{\"author\":{\"data\":{\"type\":\"user\",\"id\":109},\"links\":{\"self\":\"http:\\\/\\\/localhost:8000\\\/api\\\/v1\\\/authors\\\/109\"}},\"assignee\":{\"data\":null}},\"links\":{\"self\":\"http:\\\/\\\/localhost:8000\\\/api\\\/v1\\\/tickets\\\/153\"}}}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Delete a user's ticket",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/users\/:user_id\/tickets\/:id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/users\/:user_id\/tickets\/:id",
+                            "variable": [
+                                {
+                                    "id": "user_id",
+                                    "key": "user_id",
+                                    "value": 1,
+                                    "description": "The ID of the user."
+                                },
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": 1,
+                                    "description": "The ID of the ticket."
+                                },
+                                {
+                                    "id": "user",
+                                    "key": "user",
+                                    "value": 1,
+                                    "description": "The user id."
+                                },
+                                {
+                                    "id": "ticket",
+                                    "key": "ticket",
+                                    "value": 1,
+                                    "description": "The ticket id."
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\":null,\"message\":\"Ticket successfully deleted\",\"status\":200}",
+                            "name": ""
+                        },
+                        {
+                            "header": [],
+                            "code": 404,
+                            "body": "{\"errors\":[{\"status\":404,\"message\":\"The resource cannot be found.\",\"source\":\"App\\\\Models\\\\Ticket\"}]}",
+                            "name": "Ticket belongs to another user"
+                        }
+                    ]
+                },
+                {
+                    "name": "Replace a user's ticket",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/users\/:user_id\/tickets\/:ticket_id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/users\/:user_id\/tickets\/:ticket_id",
+                            "variable": [
+                                {
+                                    "id": "user_id",
+                                    "key": "user_id",
+                                    "value": 1,
+                                    "description": "The ID of the user."
+                                },
+                                {
+                                    "id": "ticket_id",
+                                    "key": "ticket_id",
+                                    "value": 1,
+                                    "description": "The ID of the ticket."
+                                },
+                                {
+                                    "id": "user",
+                                    "key": "user",
+                                    "value": 1,
+                                    "description": "The user id."
+                                },
+                                {
+                                    "id": "ticket",
+                                    "key": "ticket",
+                                    "value": 1,
+                                    "description": "The ticket id."
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"data\":{\"attributes\":{\"title\":\"Printer on the second floor is offline\",\"description\":\"The printer shows error E-104 and does not accept print jobs.\",\"status\":\"open\",\"priority\":\"high\"},\"relationships\":{\"author\":{\"data\":{\"id\":1}},\"assignee\":{\"data\":{\"id\":2}}}}}"
+                        },
+                        "description": "Managers only."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\":{\"type\":\"ticket\",\"id\":154,\"attributes\":{\"ticketNumber\":\"TCK-20261123-B681FM\",\"title\":\"Eius et animi quos.\",\"description\":\"Fugiat sunt nihil accusantium harum mollitia. Deserunt aut ab provident perspiciatis quo omnis nostrum. Adipisci quidem nostrum qui commodi incidunt iure.\",\"status\":\"closed\",\"priority\":\"high\",\"createdAt\":\"2026-11-23T15:10:18.000000Z\",\"updatedAt\":\"2026-11-23T15:10:18.000000Z\"},\"relationships\":{\"author\":{\"data\":{\"type\":\"user\",\"id\":110},\"links\":{\"self\":\"http:\\\/\\\/localhost:8000\\\/api\\\/v1\\\/authors\\\/110\"}},\"assignee\":{\"data\":null}},\"links\":{\"self\":\"http:\\\/\\\/localhost:8000\\\/api\\\/v1\\\/tickets\\\/154\"}}}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Update a user's ticket",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/users\/:user_id\/tickets\/:ticket_id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/users\/:user_id\/tickets\/:ticket_id",
+                            "variable": [
+                                {
+                                    "id": "user_id",
+                                    "key": "user_id",
+                                    "value": 1,
+                                    "description": "The ID of the user."
+                                },
+                                {
+                                    "id": "ticket_id",
+                                    "key": "ticket_id",
+                                    "value": 1,
+                                    "description": "The ID of the ticket."
+                                },
+                                {
+                                    "id": "user",
+                                    "key": "user",
+                                    "value": 1,
+                                    "description": "The user id."
+                                },
+                                {
+                                    "id": "ticket",
+                                    "key": "ticket",
+                                    "value": 1,
+                                    "description": "The ticket id."
+                                }
+                            ]
+                        },
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"data\":{\"attributes\":{\"title\":\"Printer on the second floor is offline\",\"description\":\"The printer shows error E-104 and does not accept print jobs.\",\"status\":\"open\",\"priority\":\"high\"},\"relationships\":{\"author\":{\"data\":{\"id\":1}},\"assignee\":{\"data\":{\"id\":2}}}}}"
+                        },
+                        "description": "Changes only the fields that are sent."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\":{\"type\":\"ticket\",\"id\":155,\"attributes\":{\"ticketNumber\":\"TCK-20261123-VIOZW7\",\"title\":\"Eius et animi quos.\",\"description\":\"Fugiat sunt nihil accusantium harum mollitia. Deserunt aut ab provident perspiciatis quo omnis nostrum. Adipisci quidem nostrum qui commodi incidunt iure.\",\"status\":\"closed\",\"priority\":\"high\",\"createdAt\":\"2026-11-23T15:10:18.000000Z\",\"updatedAt\":\"2026-11-23T15:10:18.000000Z\"},\"relationships\":{\"author\":{\"data\":{\"type\":\"user\",\"id\":111},\"links\":{\"self\":\"http:\\\/\\\/localhost:8000\\\/api\\\/v1\\\/authors\\\/111\"}},\"assignee\":{\"data\":null}},\"links\":{\"self\":\"http:\\\/\\\/localhost:8000\\\/api\\\/v1\\\/tickets\\\/155\"}}}",
+                            "name": ""
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Users",
+            "description": "\nUser management. Any logged-in user can list and view users; only managers can create,\nreplace, update and delete them.",
+            "item": [
+                {
+                    "name": "List users",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/users",
+                            "query": [
+                                {
+                                    "key": "name",
+                                    "value": "*john*",
+                                    "description": "Filter by name. Use * as a wildcard.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "email",
+                                    "value": "*@example.com",
+                                    "description": "Filter by email. Use * as a wildcard.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "sort",
+                                    "value": "-createdAt",
+                                    "description": "Sort by name, email, createdAt or updatedAt. Prefix with - for descending.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "include",
+                                    "value": "tickets",
+                                    "description": "Include the tickets each user raised.",
+                                    "disabled": false
+                                }
+                            ],
+                            "raw": "{{baseUrl}}\/api\/v1\/users?name=%2Ajohn%2A&email=%2A%40example.com&sort=-createdAt&include=tickets"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Lists every user (not only authors), with the filters and sorting from the URL."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\":[{\"type\":\"user\",\"id\":101,\"attributes\":{\"name\":\"Morgan Hirthe\",\"email\":\"ztromp@example.org\",\"isManager\":false,\"emailVerifiedAt\":\"2026-11-23T15:10:18.000000Z\",\"createdAt\":\"2026-11-23T15:10:18.000000Z\",\"updatedAt\":\"2026-11-23T15:10:18.000000Z\"},\"links\":{\"self\":\"http:\\\/\\\/localhost:8000\\\/api\\\/v1\\\/authors\\\/101\"}},{\"type\":\"user\",\"id\":102,\"attributes\":{\"name\":\"Domingo Leuschke\",\"email\":\"jleffler@example.com\",\"isManager\":false,\"emailVerifiedAt\":\"2026-11-23T15:10:18.000000Z\",\"createdAt\":\"2026-11-23T15:10:18.000000Z\",\"updatedAt\":\"2026-11-23T15:10:18.000000Z\"},\"links\":{\"self\":\"http:\\\/\\\/localhost:8000\\\/api\\\/v1\\\/authors\\\/102\"}}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":15,\"to\":2,\"total\":2}}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Create a user",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/users",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/users"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"data\":{\"attributes\":{\"name\":\"New Staff\",\"email\":\"staff@example.com\",\"isManager\":false,\"password\":\"password123\"}}}"
+                        },
+                        "description": "Managers only. The password is hashed before it is stored."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 201,
+                            "body": "{\"data\":{\"type\":\"user\",\"id\":103,\"attributes\":{\"name\":\"Ms. Audra Crooks II\",\"email\":\"gulgowski.asia@example.com\",\"isManager\":false,\"emailVerifiedAt\":\"2026-11-23T15:10:18.000000Z\",\"createdAt\":\"2026-11-23T15:10:18.000000Z\",\"updatedAt\":\"2026-11-23T15:10:18.000000Z\"},\"links\":{\"self\":\"http:\\\/\\\/localhost:8000\\\/api\\\/v1\\\/authors\\\/103\"}}}",
+                            "name": ""
+                        },
+                        {
+                            "header": [],
+                            "code": 403,
+                            "body": "{\"errors\":[{\"status\":403,\"message\":\"You are not authorized to create that resource.\",\"source\":\"\"}]}",
+                            "name": "Not a manager"
+                        }
+                    ]
+                },
+                {
+                    "name": "Show a user",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/users\/:id",
+                            "query": [
+                                {
+                                    "key": "include",
+                                    "value": "tickets",
+                                    "description": "Include the tickets this user raised.",
+                                    "disabled": false
+                                }
+                            ],
+                            "raw": "{{baseUrl}}\/api\/v1\/users\/:id?include=tickets",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": 1,
+                                    "description": "The ID of the user."
+                                },
+                                {
+                                    "id": "user",
+                                    "key": "user",
+                                    "value": 1,
+                                    "description": "The user id."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\":{\"type\":\"user\",\"id\":104,\"attributes\":{\"name\":\"Morgan Hirthe\",\"email\":\"matilda.feeney@example.net\",\"isManager\":false,\"emailVerifiedAt\":\"2026-11-23T15:10:18.000000Z\",\"createdAt\":\"2026-11-23T15:10:18.000000Z\",\"updatedAt\":\"2026-11-23T15:10:18.000000Z\"},\"links\":{\"self\":\"http:\\\/\\\/localhost:8000\\\/api\\\/v1\\\/authors\\\/104\"}}}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Delete a user",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/users\/:id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/users\/:id",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": 1,
+                                    "description": "The ID of the user."
+                                },
+                                {
+                                    "id": "user",
+                                    "key": "user",
+                                    "value": 1,
+                                    "description": "The user id."
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Managers only. The tickets the user raised are deleted with them, and tickets assigned\nto them become unassigned."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\":null,\"message\":\"User successfully deleted\",\"status\":200}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Replace a user",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/users\/:user_id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/users\/:user_id",
+                            "variable": [
+                                {
+                                    "id": "user_id",
+                                    "key": "user_id",
+                                    "value": 1,
+                                    "description": "The ID of the user."
+                                },
+                                {
+                                    "id": "user",
+                                    "key": "user",
+                                    "value": 1,
+                                    "description": "The user id."
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"data\":{\"attributes\":{\"name\":\"New Staff\",\"email\":\"staff@example.com\",\"isManager\":false,\"password\":\"password123\"}}}"
+                        },
+                        "description": "Managers only. Every field is required."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\":{\"type\":\"user\",\"id\":105,\"attributes\":{\"name\":\"Ms. Audra Crooks II\",\"email\":\"idickens@example.org\",\"isManager\":false},\"links\":{\"self\":\"http:\\\/\\\/localhost:8000\\\/api\\\/v1\\\/authors\\\/105\"}}}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Update a user",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/users\/:user_id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/users\/:user_id",
+                            "variable": [
+                                {
+                                    "id": "user_id",
+                                    "key": "user_id",
+                                    "value": 1,
+                                    "description": "The ID of the user."
+                                },
+                                {
+                                    "id": "user",
+                                    "key": "user",
+                                    "value": 1,
+                                    "description": "The user id."
+                                }
+                            ]
+                        },
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"data\":{\"attributes\":{\"name\":\"New Staff\",\"email\":\"staff@example.com\",\"isManager\":false,\"password\":\"password123\"}}}"
+                        },
+                        "description": "Managers only. Changes only the fields that are sent, for example isManager to promote a user."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\":{\"type\":\"user\",\"id\":106,\"attributes\":{\"name\":\"Ms. Audra Crooks II\",\"email\":\"aschuster@example.com\",\"isManager\":false},\"links\":{\"self\":\"http:\\\/\\\/localhost:8000\\\/api\\\/v1\\\/authors\\\/106\"}}}",
+                            "name": ""
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "Authorization",
+                "type": "string"
+            }
+        ]
+    }
+}

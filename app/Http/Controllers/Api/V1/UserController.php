@@ -12,13 +12,26 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 /**
- * User management for managers: list, create, show, replace, update and delete users.
+ * @group Users
+ *
+ * User management. Any logged-in user can list and view users; only managers can create,
+ * replace, update and delete them.
  */
 class UserController extends APIController
 {
     /**
-     * GET /api/v1/users
+     * List users
+     *
      * Lists every user (not only authors), with the filters and sorting from the URL.
+     *
+     * @queryParam name string Filter by name. Use * as a wildcard. Example: *john*
+     * @queryParam email string Filter by email. Use * as a wildcard. Example: *@example.com
+     * @queryParam sort string Sort by name, email, createdAt or updatedAt. Prefix with - for descending. Example: -createdAt
+     * @queryParam include string Include the tickets each user raised. Example: tickets
+     *
+     * @apiResourceCollection App\Http\Resources\V1\UserResource
+     *
+     * @apiResourceModel App\Models\User paginate=15
      */
     public function index(AuthorFilter $filters): AnonymousResourceCollection
     {
@@ -28,8 +41,15 @@ class UserController extends APIController
     }
 
     /**
-     * POST /api/v1/users
-     * Creates a user (needs the user:create ability).
+     * Create a user
+     *
+     * Managers only. The password is hashed before it is stored.
+     *
+     * @apiResource App\Http\Resources\V1\UserResource status=201
+     *
+     * @apiResourceModel App\Models\User
+     *
+     * @response 403 scenario="Not a manager" {"errors":[{"status":403,"message":"You are not authorized to create that resource.","source":""}]}
      */
     public function store(StoreUserRequest $request): UserResource|JsonResponse
     {
@@ -41,8 +61,15 @@ class UserController extends APIController
     }
 
     /**
-     * GET /api/v1/users/{user}
-     * Shows one user. ?include=tickets also loads the tickets the user raised.
+     * Show a user
+     *
+     * @urlParam user integer required The user id. Example: 1
+     *
+     * @queryParam include string Include the tickets this user raised. Example: tickets
+     *
+     * @apiResource App\Http\Resources\V1\UserResource
+     *
+     * @apiResourceModel App\Models\User
      */
     public function show(User $user): UserResource
     {
@@ -54,8 +81,15 @@ class UserController extends APIController
     }
 
     /**
-     * PATCH /api/v1/users/{user}
-     * Updates only the fields that were sent (needs user:update).
+     * Update a user
+     *
+     * Managers only. Changes only the fields that are sent, for example isManager to promote a user.
+     *
+     * @urlParam user integer required The user id. Example: 1
+     *
+     * @apiResource App\Http\Resources\V1\UserResource
+     *
+     * @apiResourceModel App\Models\User
      */
     public function update(UpdateUserRequest $request, User $user): UserResource|JsonResponse
     {
@@ -69,8 +103,15 @@ class UserController extends APIController
     }
 
     /**
-     * PUT /api/v1/users/{user}
-     * Replaces the whole user: every field is required (needs user:replace).
+     * Replace a user
+     *
+     * Managers only. Every field is required.
+     *
+     * @urlParam user integer required The user id. Example: 1
+     *
+     * @apiResource App\Http\Resources\V1\UserResource
+     *
+     * @apiResourceModel App\Models\User
      */
     public function replace(ReplaceUserRequest $request, User $user): UserResource|JsonResponse
     {
@@ -84,9 +125,14 @@ class UserController extends APIController
     }
 
     /**
-     * DELETE /api/v1/users/{user}
-     * Deletes the user (needs user:delete). The tickets they raised are deleted with them,
-     * and tickets assigned to them become unassigned (see the tickets migration).
+     * Delete a user
+     *
+     * Managers only. The tickets the user raised are deleted with them, and tickets assigned
+     * to them become unassigned.
+     *
+     * @urlParam user integer required The user id. Example: 1
+     *
+     * @response 200 {"data":null,"message":"User successfully deleted","status":200}
      */
     public function destroy(User $user): JsonResponse
     {

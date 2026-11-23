@@ -36,8 +36,9 @@ class UpdateTicketRequest extends BaseTicketRequest
             'data.relationships.assignee.data.id' => ['prohibited'],
         ];
 
-        // Only the broad ability lifts the restriction (managers)
-        if ($this->user()->tokenCan(Abilities::UpdateTicket)) {
+        // Only the broad ability lifts the restriction (managers).
+        // Null-safe so Scribe can read the rules while no user is logged in.
+        if ($this->user()?->tokenCan(Abilities::UpdateTicket) ?? true) {
             $rules['data.relationships.author.data.id'] = ['sometimes', 'integer', 'exists:users,id'];
             // null unassigns the ticket
             $rules['data.relationships.assignee.data.id'] = ['sometimes', 'nullable', 'integer', 'exists:users,id'];

@@ -1,0 +1,1053 @@
+name: Tickets
+description: |-
+
+  Create, read, update and delete support tickets. Regular users act on the tickets they
+  raised; managers act on any ticket and are the only ones who can assign tickets.
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/v1/tickets
+    metadata:
+      custom: []
+      groupName: Tickets
+      groupDescription: |-
+
+        Create, read, update and delete support tickets. Regular users act on the tickets they
+        raised; managers act on any ticket and are the only ones who can assign tickets.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'List tickets'
+      description: |-
+        Returns a paginated list of tickets (15 per page, without descriptions). Supports filtering,
+        searching, sorting and including the author and assignee.
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_ACCESS_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters:
+      status:
+        custom: []
+        name: status
+        description: 'Filter by status. Use a comma for several.'
+        required: false
+        example: 'open,in_progress'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      priority:
+        custom: []
+        name: priority
+        description: 'Filter by priority. Use a comma for several.'
+        required: false
+        example: 'high,urgent'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      search:
+        custom: []
+        name: search
+        description: 'Search the ticket number and the title.'
+        required: false
+        example: printer
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      title:
+        custom: []
+        name: title
+        description: 'Filter by title. Use * as a wildcard.'
+        required: false
+        example: '*printer*'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      ticketNumber:
+        custom: []
+        name: ticketNumber
+        description: 'Filter by ticket number. Use * as a wildcard.'
+        required: false
+        example: 'TCK-2026*'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      createdBy:
+        custom: []
+        name: createdBy
+        description: 'Tickets raised by these user ids.'
+        required: false
+        example: '1'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      assignedTo:
+        custom: []
+        name: assignedTo
+        description: 'Tickets assigned to these user ids.'
+        required: false
+        example: '2'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      createdAt:
+        custom: []
+        name: createdAt
+        description: 'A date, or a range as from,to.'
+        required: false
+        example: '2026-01-01,2026-12-31'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      updatedAt:
+        custom: []
+        name: updatedAt
+        description: 'A date, or a range as from,to.'
+        required: false
+        example: '2026-11-23'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      sort:
+        custom: []
+        name: sort
+        description: 'Sort by ticketNumber, title, status, priority, createdAt or updatedAt. Prefix with - for descending.'
+        required: false
+        example: '-priority,createdAt'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      include:
+        custom: []
+        name: include
+        description: 'Include related users: author, assignee.'
+        required: false
+        example: author
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      page:
+        custom: []
+        name: page
+        description: 'The page number.'
+        required: false
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanQueryParameters:
+      status: 'open,in_progress'
+      priority: 'high,urgent'
+      search: printer
+      title: '*printer*'
+      ticketNumber: 'TCK-2026*'
+      createdBy: '1'
+      assignedTo: '2'
+      createdAt: '2026-01-01,2026-12-31'
+      updatedAt: '2026-11-23'
+      sort: '-priority,createdAt'
+      include: author
+      page: 1
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"data":[{"type":"ticket","id":145,"attributes":{"ticketNumber":"TCK-20261123-EIW6VH","title":"Adipisci quidem nostrum qui commodi.","status":"resolved","priority":"high","createdAt":"2026-11-23T15:10:18.000000Z","updatedAt":"2026-11-23T15:10:18.000000Z"},"relationships":{"author":{"data":{"type":"user","id":92},"links":{"self":"http:\/\/localhost:8000\/api\/v1\/authors\/92"}},"assignee":{"data":null}},"links":{"self":"http:\/\/localhost:8000\/api\/v1\/tickets\/145"}},{"type":"ticket","id":146,"attributes":{"ticketNumber":"TCK-20261123-NNFBNN","title":"Dignissimos neque blanditiis.","status":"closed","priority":"low","createdAt":"2026-11-23T15:10:18.000000Z","updatedAt":"2026-11-23T15:10:18.000000Z"},"relationships":{"author":{"data":{"type":"user","id":93},"links":{"self":"http:\/\/localhost:8000\/api\/v1\/authors\/93"}},"assignee":{"data":null}},"links":{"self":"http:\/\/localhost:8000\/api\/v1\/tickets\/146"}}],"links":{"first":"\/?page=1","last":"\/?page=1","prev":null,"next":null},"meta":{"current_page":1,"from":1,"last_page":1,"links":[{"url":null,"label":"&laquo; Previous","page":null,"active":false},{"url":"\/?page=1","label":"1","page":1,"active":true},{"url":null,"label":"Next &raquo;","page":null,"active":false}],"path":"\/","per_page":15,"to":2,"total":2}}'
+        headers: []
+        description: ''
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/v1/tickets
+    metadata:
+      custom: []
+      groupName: Tickets
+      groupDescription: |-
+
+        Create, read, update and delete support tickets. Regular users act on the tickets they
+        raised; managers act on any ticket and are the only ones who can assign tickets.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Create a ticket'
+      description: |-
+        Managers can choose any author and an assignee. Regular users can only create tickets
+        for themselves and cannot assign them. The ticket number is generated by the server.
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_ACCESS_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      data:
+        custom: []
+        name: data
+        description: ''
+        required: true
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes:
+        custom: []
+        name: data.attributes
+        description: ''
+        required: true
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.title:
+        custom: []
+        name: data.attributes.title
+        description: 'A short summary of the problem. Must not be greater than 255 characters.'
+        required: true
+        example: 'Printer on the second floor is offline'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.description:
+        custom: []
+        name: data.attributes.description
+        description: 'The full description of the problem.'
+        required: true
+        example: 'The printer shows error E-104 and does not accept print jobs.'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.status:
+        custom: []
+        name: data.attributes.status
+        description: 'The ticket status: open, in_progress, pending, resolved, closed.'
+        required: false
+        example: open
+        type: string
+        enumValues:
+          - open
+          - in_progress
+          - pending
+          - resolved
+          - closed
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.priority:
+        custom: []
+        name: data.attributes.priority
+        description: 'The ticket priority: low, medium, high, urgent.'
+        required: false
+        example: high
+        type: string
+        enumValues:
+          - low
+          - medium
+          - high
+          - urgent
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.relationships.author.data:
+        custom: []
+        name: data.relationships.author.data
+        description: ''
+        required: false
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.relationships.author:
+        custom: []
+        name: data.relationships.author
+        description: ''
+        required: false
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.relationships:
+        custom: []
+        name: data.relationships
+        description: ''
+        required: false
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.relationships.author.data.id:
+        custom: []
+        name: data.relationships.author.data.id
+        description: 'The id of the user who raised the ticket. Regular users must use their own id. Must match an existing stored value.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.relationships.assignee.data:
+        custom: []
+        name: data.relationships.assignee.data
+        description: ''
+        required: false
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.relationships.assignee:
+        custom: []
+        name: data.relationships.assignee
+        description: ''
+        required: false
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.relationships.assignee.data.id:
+        custom: []
+        name: data.relationships.assignee.data.id
+        description: 'The id of the user the ticket is assigned to, or null to unassign. Managers only: regular users may not assign a new ticket. Must match an existing stored value.'
+        required: false
+        example: 2
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      data:
+        attributes:
+          title: 'Printer on the second floor is offline'
+          description: 'The printer shows error E-104 and does not accept print jobs.'
+          status: open
+          priority: high
+        relationships:
+          author:
+            data:
+              id: 1
+          assignee:
+            data:
+              id: 2
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 201
+        content: '{"data":{"type":"ticket","id":147,"attributes":{"ticketNumber":"TCK-20261123-KTXZXK","title":"Eius et animi quos.","description":"Fugiat sunt nihil accusantium harum mollitia. Deserunt aut ab provident perspiciatis quo omnis nostrum. Adipisci quidem nostrum qui commodi incidunt iure.","status":"closed","priority":"high","createdAt":"2026-11-23T15:10:18.000000Z","updatedAt":"2026-11-23T15:10:18.000000Z"},"relationships":{"author":{"data":{"type":"user","id":94},"links":{"self":"http:\/\/localhost:8000\/api\/v1\/authors\/94"}},"assignee":{"data":null}},"links":{"self":"http:\/\/localhost:8000\/api\/v1\/tickets\/147"}}}'
+        headers: []
+        description: ''
+      -
+        custom: []
+        status: 422
+        content: '{"errors":[{"status":422,"message":"The data.attributes.title field is required.","source":"data.attributes.title"}]}'
+        headers: []
+        description: 'Validation failed'
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/v1/tickets/{id}'
+    metadata:
+      custom: []
+      groupName: Tickets
+      groupDescription: |-
+
+        Create, read, update and delete support tickets. Regular users act on the tickets they
+        raised; managers act on any ticket and are the only ones who can assign tickets.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Show a ticket'
+      description: 'Returns one ticket, including its description.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_ACCESS_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The ID of the ticket.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      ticket:
+        custom: []
+        name: ticket
+        description: 'The ticket id.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: 1
+      ticket: 1
+    queryParameters:
+      include:
+        custom: []
+        name: include
+        description: 'Include related users: author, assignee.'
+        required: false
+        example: 'author,assignee'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanQueryParameters:
+      include: 'author,assignee'
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"data":{"type":"ticket","id":148,"attributes":{"ticketNumber":"TCK-20261123-CAXDRO","title":"Adipisci quidem nostrum qui commodi.","description":"Odit et et modi. Nostrum omnis autem et consequatur aut. Enim non facere tempora ex voluptatem laboriosam praesentium. Adipisci molestias fugit deleniti distinctio eum doloremque id.","status":"resolved","priority":"high","createdAt":"2026-11-23T15:10:18.000000Z","updatedAt":"2026-11-23T15:10:18.000000Z"},"relationships":{"author":{"data":{"type":"user","id":95},"links":{"self":"http:\/\/localhost:8000\/api\/v1\/authors\/95"}},"assignee":{"data":null}},"links":{"self":"http:\/\/localhost:8000\/api\/v1\/tickets\/148"}}}'
+        headers: []
+        description: ''
+      -
+        custom: []
+        status: 404
+        content: '{"errors":[{"status":404,"message":"The resource cannot be found.","source":"App\\Models\\Ticket"}]}'
+        headers: []
+        description: 'Ticket not found'
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - DELETE
+    uri: 'api/v1/tickets/{id}'
+    metadata:
+      custom: []
+      groupName: Tickets
+      groupDescription: |-
+
+        Create, read, update and delete support tickets. Regular users act on the tickets they
+        raised; managers act on any ticket and are the only ones who can assign tickets.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Delete a ticket'
+      description: 'Regular users can delete the tickets they raised; managers can delete any ticket.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_ACCESS_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The ID of the ticket.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      ticket:
+        custom: []
+        name: ticket
+        description: 'The ticket id.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: 1
+      ticket: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"data":null,"message":"Ticket successfully deleted","status":200}'
+        headers: []
+        description: ''
+      -
+        custom: []
+        status: 403
+        content: '{"errors":[{"status":403,"message":"You are not authorized to delete that resource.","source":""}]}'
+        headers: []
+        description: 'Not your ticket'
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PUT
+    uri: 'api/v1/tickets/{ticket_id}'
+    metadata:
+      custom: []
+      groupName: Tickets
+      groupDescription: |-
+
+        Create, read, update and delete support tickets. Regular users act on the tickets they
+        raised; managers act on any ticket and are the only ones who can assign tickets.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Replace a ticket'
+      description: 'Replaces every field of the ticket (managers only). The assignee must be sent, but may be null.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_ACCESS_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      ticket_id:
+        custom: []
+        name: ticket_id
+        description: 'The ID of the ticket.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      ticket:
+        custom: []
+        name: ticket
+        description: 'The ticket id.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      ticket_id: 1
+      ticket: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      data:
+        custom: []
+        name: data
+        description: ''
+        required: true
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes:
+        custom: []
+        name: data.attributes
+        description: ''
+        required: true
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.title:
+        custom: []
+        name: data.attributes.title
+        description: 'A short summary of the problem. Must not be greater than 255 characters.'
+        required: true
+        example: 'Printer on the second floor is offline'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.description:
+        custom: []
+        name: data.attributes.description
+        description: 'The full description of the problem.'
+        required: true
+        example: 'The printer shows error E-104 and does not accept print jobs.'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.status:
+        custom: []
+        name: data.attributes.status
+        description: 'The ticket status: open, in_progress, pending, resolved, closed.'
+        required: true
+        example: open
+        type: string
+        enumValues:
+          - open
+          - in_progress
+          - pending
+          - resolved
+          - closed
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.priority:
+        custom: []
+        name: data.attributes.priority
+        description: 'The ticket priority: low, medium, high, urgent.'
+        required: true
+        example: high
+        type: string
+        enumValues:
+          - low
+          - medium
+          - high
+          - urgent
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.relationships:
+        custom: []
+        name: data.relationships
+        description: ''
+        required: true
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.relationships.author:
+        custom: []
+        name: data.relationships.author
+        description: ''
+        required: true
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.relationships.author.data:
+        custom: []
+        name: data.relationships.author.data
+        description: ''
+        required: true
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.relationships.author.data.id:
+        custom: []
+        name: data.relationships.author.data.id
+        description: 'The id of the user who raised the ticket. Regular users must use their own id. Must match an existing stored value.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.relationships.assignee:
+        custom: []
+        name: data.relationships.assignee
+        description: ''
+        required: true
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.relationships.assignee.data:
+        custom: []
+        name: data.relationships.assignee.data
+        description: ''
+        required: true
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.relationships.assignee.data.id:
+        custom: []
+        name: data.relationships.assignee.data.id
+        description: 'The id of the user the ticket is assigned to, or null to unassign. Must match an existing stored value.'
+        required: false
+        example: 2
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      data:
+        attributes:
+          title: 'Printer on the second floor is offline'
+          description: 'The printer shows error E-104 and does not accept print jobs.'
+          status: open
+          priority: high
+        relationships:
+          author:
+            data:
+              id: 1
+          assignee:
+            data:
+              id: 2
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"data":{"type":"ticket","id":149,"attributes":{"ticketNumber":"TCK-20261123-5QR2LT","title":"Eius et animi quos.","description":"Fugiat sunt nihil accusantium harum mollitia. Deserunt aut ab provident perspiciatis quo omnis nostrum. Adipisci quidem nostrum qui commodi incidunt iure.","status":"closed","priority":"high","createdAt":"2026-11-23T15:10:18.000000Z","updatedAt":"2026-11-23T15:10:18.000000Z"},"relationships":{"author":{"data":{"type":"user","id":96},"links":{"self":"http:\/\/localhost:8000\/api\/v1\/authors\/96"}},"assignee":{"data":null}},"links":{"self":"http:\/\/localhost:8000\/api\/v1\/tickets\/149"}}}'
+        headers: []
+        description: ''
+      -
+        custom: []
+        status: 403
+        content: '{"errors":[{"status":403,"message":"You are not authorized to replace that resource.","source":""}]}'
+        headers: []
+        description: 'Not a manager'
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PATCH
+    uri: 'api/v1/tickets/{ticket_id}'
+    metadata:
+      custom: []
+      groupName: Tickets
+      groupDescription: |-
+
+        Create, read, update and delete support tickets. Regular users act on the tickets they
+        raised; managers act on any ticket and are the only ones who can assign tickets.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Update a ticket'
+      description: |-
+        Changes only the fields that are sent: for example just the status, just the priority,
+        or (managers only) the assignee or the author.
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_ACCESS_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      ticket_id:
+        custom: []
+        name: ticket_id
+        description: 'The ID of the ticket.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      ticket:
+        custom: []
+        name: ticket
+        description: 'The ticket id.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      ticket_id: 1
+      ticket: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      data.attributes:
+        custom: []
+        name: data.attributes
+        description: ''
+        required: false
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data:
+        custom: []
+        name: data
+        description: ''
+        required: false
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.title:
+        custom: []
+        name: data.attributes.title
+        description: 'A short summary of the problem. Must not be greater than 255 characters.'
+        required: false
+        example: 'Printer on the second floor is offline'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.description:
+        custom: []
+        name: data.attributes.description
+        description: 'The full description of the problem.'
+        required: false
+        example: 'The printer shows error E-104 and does not accept print jobs.'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.status:
+        custom: []
+        name: data.attributes.status
+        description: 'The ticket status: open, in_progress, pending, resolved, closed.'
+        required: false
+        example: open
+        type: string
+        enumValues:
+          - open
+          - in_progress
+          - pending
+          - resolved
+          - closed
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.priority:
+        custom: []
+        name: data.attributes.priority
+        description: 'The ticket priority: low, medium, high, urgent.'
+        required: false
+        example: high
+        type: string
+        enumValues:
+          - low
+          - medium
+          - high
+          - urgent
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.relationships.author.data:
+        custom: []
+        name: data.relationships.author.data
+        description: ''
+        required: false
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.relationships.author:
+        custom: []
+        name: data.relationships.author
+        description: ''
+        required: false
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.relationships:
+        custom: []
+        name: data.relationships
+        description: ''
+        required: false
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.relationships.author.data.id:
+        custom: []
+        name: data.relationships.author.data.id
+        description: 'The id of the user who raised the ticket. Regular users must use their own id. Must match an existing stored value.'
+        required: false
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.relationships.assignee.data:
+        custom: []
+        name: data.relationships.assignee.data
+        description: ''
+        required: false
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.relationships.assignee:
+        custom: []
+        name: data.relationships.assignee
+        description: ''
+        required: false
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.relationships.assignee.data.id:
+        custom: []
+        name: data.relationships.assignee.data.id
+        description: 'The id of the user the ticket is assigned to, or null to unassign. Must match an existing stored value.'
+        required: false
+        example: 2
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      data:
+        attributes:
+          title: 'Printer on the second floor is offline'
+          description: 'The printer shows error E-104 and does not accept print jobs.'
+          status: open
+          priority: high
+        relationships:
+          author:
+            data:
+              id: 1
+          assignee:
+            data:
+              id: 2
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"data":{"type":"ticket","id":150,"attributes":{"ticketNumber":"TCK-20261123-83TISY","title":"Eius et animi quos.","description":"Fugiat sunt nihil accusantium harum mollitia. Deserunt aut ab provident perspiciatis quo omnis nostrum. Adipisci quidem nostrum qui commodi incidunt iure.","status":"closed","priority":"high","createdAt":"2026-11-23T15:10:18.000000Z","updatedAt":"2026-11-23T15:10:18.000000Z"},"relationships":{"author":{"data":{"type":"user","id":97},"links":{"self":"http:\/\/localhost:8000\/api\/v1\/authors\/97"}},"assignee":{"data":null}},"links":{"self":"http:\/\/localhost:8000\/api\/v1\/tickets\/150"}}}'
+        headers: []
+        description: ''
+      -
+        custom: []
+        status: 403
+        content: '{"errors":[{"status":403,"message":"You are not authorized to update that resource.","source":""}]}'
+        headers: []
+        description: 'Not your ticket'
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null

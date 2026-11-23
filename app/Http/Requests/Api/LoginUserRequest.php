@@ -28,4 +28,23 @@ class LoginUserRequest extends FormRequest
             'password' => ['required', 'string'],
         ];
     }
+
+    /**
+     * Descriptions and examples that Scribe shows in the documentation.
+     *
+     * @return array<string, array{description: string, example: mixed}>
+     */
+    public function bodyParameters(): array
+    {
+        return [
+            'email' => [
+                'description' => 'Your email address.',
+                'example' => 'manager@manager.com',
+            ],
+            'password' => [
+                'description' => 'Your password.',
+                'example' => 'password',
+            ],
+        ];
+    }
 }

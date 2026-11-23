@@ -33,4 +33,31 @@ class RegisterUserRequest extends FormRequest
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ];
     }
+
+    /**
+     * Descriptions and examples that Scribe shows in the documentation.
+     *
+     * @return array<string, array{description: string, example: mixed}>
+     */
+    public function bodyParameters(): array
+    {
+        return [
+            'name' => [
+                'description' => 'Your full name.',
+                'example' => 'Jane Doe',
+            ],
+            'email' => [
+                'description' => 'Your email address. It must not be registered yet.',
+                'example' => 'jane@example.com',
+            ],
+            'password' => [
+                'description' => 'At least 8 characters.',
+                'example' => 'password',
+            ],
+            'password_confirmation' => [
+                'description' => 'The same password again.',
+                'example' => 'password',
+            ],
+        ];
+    }
 }
